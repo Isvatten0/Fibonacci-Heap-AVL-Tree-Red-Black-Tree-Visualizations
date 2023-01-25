@@ -4,5 +4,5 @@ Created By Team 6: Bryson Duckworth, Alyssa Gabrielson, Will Miller, Riley Parke
 
 Tasks:  
   1.) Visualize Fibbonacci Heaps  
-  2.) Visualize AVL Trees 
-  3.) Visualize Red Black Trees 
+  2.) Visualize AVL Trees   
+  3.) Visualize Red Black Trees   
