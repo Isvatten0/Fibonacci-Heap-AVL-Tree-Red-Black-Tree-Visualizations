@@ -3,18 +3,18 @@
 # Node Class
 class Node() :
     # node constructor
-    def __init__(self, value, parent, left_child, right_child, color):
+    def __init__(self, value, P, L, R, C):
         self.value = value
-        self.parent = parent
-        self.left_child = left_child
-        self.right_child = right_child
-        self.color = color
-
+        self.parent = P
+        self.left_child = L
+        self.right_child =R
+        self.color = C
+        
 # Red Black Tree Class
 class RBT() :
     # RBT constructor
     def __init__(self):
-        self.NULL = Node(0)
+        self.NULL = Node(0, None, None, None, None)
         self.root = self.NULL
         self.NULL.left_child = None
         self.NULL.right_child = None
@@ -29,7 +29,7 @@ class RBT() :
         
         while curr_node != self.NULL:                                              #find correct place in tree
             prev_node = curr_node
-            if node.value < curr_node.val:
+            if node.value < curr_node.value:
                 curr_node = curr_node.left_child
             else:
                 curr_node = curr_node.right_child
@@ -39,7 +39,7 @@ class RBT() :
             self.root = node
             node.color = "black"
             return
-        elif node.val < prev_node.val:                                             #else, update previous node's children
+        elif node.value < prev_node.value:                                             #else, update previous node's children
             prev_node.left_child = node
         else:
             prev_node.right_child = node
@@ -91,7 +91,7 @@ class RBT() :
             parent = node.parent
             grandparent = node.parent.parent
             
-            if parent == grandparent.right:                                        #if parent is right child
+            if parent == grandparent.right_child:                                  #if parent is right child
                 uncle = grandparent.left_child
                 if uncle.color == "red":                                           #if uncle is also red, color both black & grandparent red
                     uncle.color = "black"
@@ -228,5 +228,20 @@ class RBT() :
             
         if b_color == "black":
             self.deletionBalance(a)
-            
-#need print function & main for test inputs
+    
+    #just to check tree, delete later       
+    def inorder(self, node):
+        if node != self.NULL:
+            self.inorder(node.left_child)
+            print(node.value, " ")
+            self.inorder(node.right_child)
+
+
+tree = RBT()
+tree.insert(7)
+tree.insert(2)
+tree.insert(22)
+tree.insert(1)
+tree.insert(6)
+
+tree.inorder(tree.root)
