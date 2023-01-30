@@ -104,8 +104,20 @@ class FibonacciHeap:
         self.numNodes -= 1
     
     # Concat one tree to another
-    def union(node1, node2):
-        print("TODO")
+    # To Do add better comments
+    def union(self, other):
+        
+        if self.numNodes == 0:
+            self.min = other.min
+        elif other.numNodes != 0:
+            self.min.left.right = other.min
+            other.min.left.right = self.min
+            temp = self.min.left
+            self.min.left = other.min.left
+            other.min.left = temp
+        
+        if self.min.key > other.min.key:
+            self.min = other.min
     
     # Decrease the key value of the given node
     def decreaseKey(self, node, newKey):
