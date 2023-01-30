@@ -20,8 +20,33 @@ class RBT() :
         self.NULL.right_child = None
         self.NULL.color = "black"
     
+    #search method
+    def find(self, search_key):
+        node = self.root
+        match = self.NULL
+        while node != self.NULL:                                                   #search tree until end or find match
+            if node.value == search_key:
+                match = node
+                
+            if node.value <= search_key:
+                node = node.right_child
+            else:
+                node = node.left_child
+        
+        if match == self.NULL:                                                     #if no match, return NULL
+            #print(search_key, " not in the tree.")
+            return self.NULL
+        else:
+            #print(search_key, " is in the tree.")                                 #if match exists, return node
+            return match
+    
     #insertion method    
     def insert(self, value):
+        search = self.find(value)
+        if search != self.NULL:                                                    #if the value exists, don't insert a duplicate
+            print("Insertion error:", search.value, "is already in the tree\n")
+            return
+        
         node = Node(value, None, self.NULL, self.NULL, "red")                      #create an instance of Node
         
         prev_node = None 
@@ -39,7 +64,7 @@ class RBT() :
             self.root = node
             node.color = "black"
             return
-        elif node.value < prev_node.value:                                             #else, update previous node's children
+        elif node.value < prev_node.value:                                         #else, update previous node's children
             prev_node.left_child = node
         else:
             prev_node.right_child = node
@@ -199,15 +224,15 @@ class RBT() :
                 node = node.left_child
         
         if match == self.NULL:                                                     #if no match, return
-            print(search_key, " not in the tree.")
+            print("Deletion error:", search_key, " not in the tree.\n")
             return
         
-        #b = match
-        #color = match.color
+        b = match
+        b_color = match.color
         if match.left_child == self.NULL:                                          #if the match node has no left child
             a = match.right_child
             self.reassign(match, match.right_child)
-        elif match.right == self.NULL:                                             #if the match node has no right child
+        elif match.right_child == self.NULL:                                             #if the match node has no right child
             a = match.left_child
             self.reassign(match, match.left_child)
         else:                                                                      #if the match node has 2 children
@@ -223,12 +248,18 @@ class RBT() :
             
             self.reassign(match, b)
             b.left_child = match.left_child
-            b.left.parent = b
+            b.left_child.parent = b
             b.color = match.color
             
         if b_color == "black":
             self.deletionBalance(a)
     
+    # find minimum node
+    def minimum(self, node):
+        while node.left_child != self.NULL:
+            node = node.left_child
+        return node
+        
     #just to check tree, delete later       
     def inorder(self, node):
         if node != self.NULL:
@@ -237,11 +268,45 @@ class RBT() :
             self.inorder(node.right_child)
 
 
+#TEST
 tree = RBT()
-tree.insert(7)
+
+test = tree.find(0)
+if(test == tree.NULL):
+    print("Search:", test.value, "is NOT in the tree\n")
+else:
+    print("Search:", test.value, "IS in the tree\n")
+
+
+tree.insert(77)
 tree.insert(2)
 tree.insert(22)
+tree.insert(77)     #already in tree should print error message
 tree.insert(1)
 tree.insert(6)
+tree.insert(66)
+tree.insert(0)
+tree.insert(701)
 
+print("Traversal after insertions:")
+tree.inorder(tree.root)
+print()
+
+test = tree.find(0)
+if(test == tree.NULL):
+    print("Search:", test.value, "is NOT in the tree\n")
+else:
+    print("Search:", test.value, "IS in the tree\n")
+
+tree.delete(0)
+tree.delete(22)
+tree.delete(100)    #not in tree, should print error message
+
+test = tree.find(0)
+if(test == tree.NULL):
+    print("Search:", test.value, "is NOT in the tree\n")
+else:
+    print("Search:", test.value, "IS in the tree\n")
+
+print("Traversal after deletions")
 tree.inorder(tree.root)
