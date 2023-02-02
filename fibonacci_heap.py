@@ -17,7 +17,6 @@ class FibonacciHeap:
         self.min = Node()       # pointer to minimum key node
         self.num_nodes = 0      # stores total number of nodes
         self.num_trees = 0      # stores number of nodes in root list
-        self.lookup_dict = {}   # dictionary for O(1) search
     
     def _insert_root(self, node):
         self.min.left.right = node
@@ -62,8 +61,6 @@ class FibonacciHeap:
         if node_y.mark == True:
             self.marks = False
         self._add_child(node_y, node_x)
-        print("y:")
-        print(node_y.child.key)
 
     #First attempt at consolidate. 
     #1. Checks the roots in the list to see if two roots have the same degree.
@@ -132,8 +129,32 @@ class FibonacciHeap:
                 self._cascade_cut(parent)
     
     # Returns the node with the specified key.
-    def search(self, key):
-        return self.lookup_dict[key]
+    def search(self, key, current_node=None, current_tree=None, current_root=None):
+        # If search was called, set current tree and node.
+        if current_node == None:
+            current_tree = self.min
+            current_node = self.min
+            current_root = self.min
+        # 1. return if current node is key.
+        # 2. search lower.
+        # 3. search right.
+        # 4. search next tree.
+        if current_node.key == key:
+            return current_node
+        elif current_node.child != None and current_node.key < key:
+            current_node = current_node.child
+            current_root = current_node
+            return self.search(key, current_node, current_tree, current_root)
+        elif current_node.right != current_root:
+            return self.search(key, current_node.right, current_tree, current_root)
+        elif current_tree.right != self.min:
+            current_tree = current_tree.right
+            current_node = current_tree
+            current_root = self.min
+            return self.search(key, current_node, current_tree, current_root)
+        else:
+            print("Node not in tree")
+            return None
     
     # Insert a new node into the FibonacciHeap.
     def insert(self, node):
@@ -150,8 +171,6 @@ class FibonacciHeap:
             self._insert_root(new_node)
             if new_node.key < self.min.key:
                 self.min = new_node
-        # Add the new node to the lookup_dict.
-        self.lookup_dict[new_node.key] = new_node
         # Increment the number of nodes.
         self.num_nodes += 1
     
@@ -172,8 +191,6 @@ class FibonacciHeap:
             print("No nodes to remove")
             return None
         else:
-            # Remove from hash table
-            self.lookup_dict.pop(self.min.key)
             # Move each child of minimum key node to root list
             if self.min.child != None:
                 itr = self.min.child
@@ -213,14 +230,9 @@ class FibonacciHeap:
         # Add other num_trees and num_nodes
         self.num_trees += other.num_trees
         self.num_nodes += other.num_nodes
-        # Add other lookups to FH.
-        self.lookup_dict.update(other.lookup_dict)
     
     # Decrease the key value of the given node.
     def decrease_key(self, node, newKey):
-        # Change the node's key in the lookup_dict.
-        self.lookup_dict[newKey] = node
-        self.lookup_dict.pop(node.key)
         # Update key value.
         node.key = newKey
         # Cut if node is not in root list and new key is less than parents key.
@@ -231,7 +243,18 @@ class FibonacciHeap:
         if (node.key < self.min.key):
             self.min = node
     
+    def display_children(self, node):
+        child_itr = node.child
+        child_list = [None] * node.degree
+        for i in range(node.degree):
+            if child_itr.child != None:
+                self.display_children(child_itr)
+            child_list[i-1] = child_itr
+            child_itr = child_itr.right
 
     # Show full Fibonacci Heap
     def display(self):
-        print("TO DO")
+        tree_root = self.min
+        for i in range(self.num_trees):
+            if tree_root.child != None:
+                self.display_children(tree_root)
