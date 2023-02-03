@@ -140,10 +140,85 @@ class AVLtree:
                         return None
                     if node.right.key == key:
                         return node
-                    node = node.right      
+                    node = node.right
+
+    def swap(self, node1: AVLnode, node2: AVLnode):
+        tempKey = node2.key
+        node2.key = node1.key
+        node1.key = tempKey
 
     def delete(self, key): #IMPLEMENT
-        return key
+        node = self.root
+        ancestors = []
+        while True:
+            if node == None:
+                return node
+
+            ancestors.append(node)
+
+            if key < node.key:
+                node = node.left
+            if key > node.key:
+                node = node.right
+            else:
+                break
+
+        nodeToSwap = node #nodeToSwap has the key that needs to be deleted. 
+       
+        if node.left == None and node.right != None: #Only right child: Find minimum of right subtree
+            parent = None
+            node = node.right  
+            while node.left != None:
+                ancestors.append(node)
+                parent = node
+                node = node.left
+            if parent != None: 
+                parent.left = node.right
+            else: #Minimum of right subtree is the top
+                nodeToSwap.right = node.right
+            self.swap(nodeToSwap, node)
+
+        if node.left == None and node.right == None:#No children
+            parent = self.findParent(node.key)
+            if parent.left == node:
+                parent.left = None
+            else:
+                parent.right = None
+            del node
+        else:#Either left child or two children. Find max of left subtree
+            parent = None
+            node = node.left
+            while node.right != None:
+                ancestors.append(node)
+                parent = node
+                node = node.right
+            if parent != None:
+                parent.right = node.left
+            else:
+                nodeToSwap.left = node.left
+
+            self.swap(nodeToSwap, node)
+            del node
+
+        
+        while len(ancestors): #Go up the tree to update heights and check for unbalanced nodes
+            nextAncestor = ancestors.pop()
+            self.updateHeight(nextAncestor)
+
+            if nextAncestor == self.root:
+                self.root = self.rotate(nextAncestor)
+            else:
+                parent = self.findParent(nextAncestor.key)
+                if parent.left == nextAncestor:
+                    parent.left = self.rotate(nextAncestor)
+                    if nodeToSwap == nextAncestor:
+                        nodeToSwap = parent.left
+                else:
+                    parent.right = self.rotate(nextAncestor)
+                    if nodeToSwap == nextAncestor:
+                        nodeToSwap = parent.right
+
+        return nodeToSwap #The node that is in the same place the deleted key was.
 
 def printTree(node: AVLnode): #Debug function to see what the tree looks like on the terminal
     if node != None: 
@@ -181,4 +256,8 @@ if __name__ == "__main__": #Testing environment
     tree.insert(27)
     print("--27--")
     #tree.root.right = tree.rotateRight(tree.find(30))
+    printTree(tree.root)
+    print("Deleting...")
+    tree.delete(30)
+    tree.delete(26)
     printTree(tree.root)
