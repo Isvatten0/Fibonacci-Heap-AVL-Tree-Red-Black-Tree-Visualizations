@@ -147,62 +147,73 @@ class AVLtree:
         node2.key = node1.key
         node1.key = tempKey
 
+    def min(self, node: AVLnode):
+        while node.left != None:
+            node = node.left
+        return node
+    
+    def max(self, node: AVLnode):
+        while node.right != None:
+            node = node.right
+        return node
+
     def delete(self, key): #IMPLEMENT
         node = self.root
         ancestors = []
+        #find the node with the key to be deleted. Save it
         while True:
             if node == None:
                 return node
 
-            ancestors.append(node)
-
             if key < node.key:
                 node = node.left
-            if key > node.key:
+            elif key > node.key:
+                node = node.right
+            else:
+                break
+        
+        nodeToDelete = node
+        nodeToReplaceDelete = None
+        nodeToRemove = node
+
+        #if it has children, find the replacement. Save it. Find ancestors of replacement. Swap, remove link to the replacement node, and update ancestors
+        if nodeToDelete.left != None and nodeToDelete.right != None:
+            nodeToReplaceDelete = self.min(nodeToDelete.right)
+        elif nodeToDelete.right != None:
+            nodeToReplaceDelete = nodeToDelete.right
+        elif nodeToDelete.left != None:
+            nodeToReplaceDelete = nodeToDelete.left
+        else:
+            nodeToReplaceDelete = None #no children: find ancestors of key to be deleted. Remove parent's link to deleted node and update ancestors
+
+        if nodeToReplaceDelete != None: #If the node with the key to be deleted had children the node we will remove is the successor
+            nodeToRemove = node
+        
+        node = self.root
+        while True:
+            if nodeToRemove.key < node.key:
+                ancestors.append(node)
+                node = node.left
+            elif nodeToRemove.key > node.key:
+                ancestors.append(node)
                 node = node.right
             else:
                 break
 
-        nodeToSwap = node #nodeToSwap has the key that needs to be deleted. 
-       
-        if node.left == None and node.right != None: #Only right child: Find minimum of right subtree
-            parent = None
-            node = node.right  
-            while node.left != None:
-                ancestors.append(node)
-                parent = node
-                node = node.left
-            if parent != None: 
-                parent.left = node.right
-            else: #Minimum of right subtree is the top
-                nodeToSwap.right = node.right
-            self.swap(nodeToSwap, node)
+        parentOfRemovedNode = self.findParent(nodeToRemove.key)
+        if nodeToDelete != nodeToRemove:
+            self.swap(nodeToDelete, nodeToRemove)
 
-        if node.left == None and node.right == None:#No children
-            parent = self.findParent(node.key)
-            if parent.left == node:
-                parent.left = None
-            else:
-                parent.right = None
-            del node
-        else:#Either left child or two children. Find max of left subtree
-            parent = None
-            node = node.left
-            while node.right != None:
-                ancestors.append(node)
-                parent = node
-                node = node.right
-            if parent != None:
-                parent.right = node.left
-            else:
-                nodeToSwap.left = node.left
-
-            self.swap(nodeToSwap, node)
-            del node
-
+        if parentOfRemovedNode.left == nodeToRemove:
+            parentOfRemovedNode.left = nodeToRemove.right
+        else:
+            parentOfRemovedNode.right = nodeToRemove.right
         
+        del nodeToRemove
+
         while len(ancestors): #Go up the tree to update heights and check for unbalanced nodes
             nextAncestor = ancestors.pop()
+
             self.updateHeight(nextAncestor)
 
             if nextAncestor == self.root:
@@ -211,14 +222,10 @@ class AVLtree:
                 parent = self.findParent(nextAncestor.key)
                 if parent.left == nextAncestor:
                     parent.left = self.rotate(nextAncestor)
-                    if nodeToSwap == nextAncestor:
-                        nodeToSwap = parent.left
                 else:
                     parent.right = self.rotate(nextAncestor)
-                    if nodeToSwap == nextAncestor:
-                        nodeToSwap = parent.right
 
-        return nodeToSwap #The node that is in the same place the deleted key was.
+        return None
 
 def printTree(node: AVLnode): #Debug function to see what the tree looks like on the terminal
     if node != None: 
@@ -235,29 +242,20 @@ def printTree(node: AVLnode): #Debug function to see what the tree looks like on
         printTree(node.right)
 
 
-
-if __name__ == "__main__": #Testing environment
-    tree = AVLtree(2)
+if __name__ == "__main__":
+    tree = AVLtree(1)
+    tree.insert(20)
     tree.insert(15)
-    print("--15--")
-    printTree(tree.root)
-    tree.insert(10)
-    print("--10--")
-    printTree(tree.root)
-    tree.insert(30)
-    print("--30--")
-    printTree(tree.root)
     tree.insert(25)
-    print("--25--")
-    printTree(tree.root)
+    tree.insert(14)
+    tree.insert(24)
+    tree.insert(16)
     tree.insert(26)
-    print("--26--")
+    tree.insert(13)
+    tree.insert(23)
     printTree(tree.root)
-    tree.insert(27)
-    print("--27--")
-    #tree.root.right = tree.rotateRight(tree.find(30))
-    printTree(tree.root)
-    print("Deleting...")
-    tree.delete(30)
-    tree.delete(26)
+    print("Delete phase")
+    tree.delete(13)
+    tree.delete(14)
+    tree.delete(16)
     printTree(tree.root)
