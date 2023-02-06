@@ -242,19 +242,3 @@ class FibonacciHeap:
         # Change min node if new key is less than current minimum key.
         if (node.key < self.min.key):
             self.min = node
-    
-    def display_children(self, node):
-        child_itr = node.child
-        child_list = [None] * node.degree
-        for i in range(node.degree):
-            if child_itr.child != None:
-                self.display_children(child_itr)
-            child_list[i-1] = child_itr
-            child_itr = child_itr.right
-
-    # Show full Fibonacci Heap
-    def display(self):
-        tree_root = self.min
-        for i in range(self.num_trees):
-            if tree_root.child != None:
-                self.display_children(tree_root)
