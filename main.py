@@ -1,3 +1,5 @@
+import time
+
 import tkinter as tk
 
 import fibonacci_heap
@@ -5,11 +7,15 @@ import fibonacci_heap
 # Display each node of the fibonacci heap
 def display(canvas: tk.Canvas,
             current_node: fibonacci_heap.Node,
+            min_node: fibonacci_heap.Node, 
             x: int,
             y: int,) -> int:
 
     # Draw node
-    canvas.create_oval(x, y, x+30, y+30, fill="white")
+    if current_node.mark == True:
+        canvas.create_oval(x, y, x+30, y+30, fill="red")
+    else:
+        canvas.create_oval(x, y, x+30, y+30, fill="white")
     canvas.create_text(x+15, y+15, text=current_node.key)
 
     # Draw each linked node.
@@ -22,7 +28,7 @@ def display(canvas: tk.Canvas,
         canvas.pack()
 
         # Draw Child Links
-        display(canvas, current_child, x+offset, y+100)
+        display(canvas, current_child, min_node, x+offset, y+100)
 
         # Draw Sibling Links
         if current_child != current_node.child.left:
@@ -34,6 +40,10 @@ def display(canvas: tk.Canvas,
 
         # Iterate child.
         current_child = current_child.right
+    
+    if current_node.parent == None and current_node.right != min_node:
+        canvas.create_line(x+30, y+15, x+500, y+15)
+        display(canvas, current_node.right, min_node, x+500, y)
 
 def main() -> None:
     window = tk.Tk()
@@ -42,12 +52,16 @@ def main() -> None:
     canvas.create_text(300, 50, text="Yo")
     canvas.pack()
     FH = fibonacci_heap.FibonacciHeap()
-    for i in range(25):
+    for i in range(26):
         FH.insert(i)
-        if i % 5 == 0:
+        if i % 5 == 1:
             FH.extract_min()
+        time.sleep(1)
         canvas.delete('all')
-        display(canvas, FH.min, 305, 100)
+        display(canvas, FH.min, FH.min, 181, 100)
+    # x = FH.search(18)
+    # FH.delete(x)
+    # display(canvas, FH.min, FH.min, 181, 100)
     window.mainloop()
     # window.attributes('-fullscreen',True)
 
