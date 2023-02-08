@@ -1,6 +1,6 @@
 import time
 import threading
-
+from tkinter.ttk import Label
 import tkinter as tk
 
 import fibonacci_heap
@@ -10,12 +10,15 @@ def display(current_node: fibonacci_heap.Node,
             min_node: fibonacci_heap.Node, 
             x: int,
             y: int,) -> int:
+    canvas.configure(background='grey')
+    text = Label(canvas, text="Fibonnaci Heap")
+    text.place(x=350,y=50)
 
     # Draw node
     if current_node.mark == True:
-        canvas.create_oval(x, y, x+30, y+30, fill="red")
+        canvas.create_oval(x, y, x+30, y+30, fill="blue")
     else:
-        canvas.create_oval(x, y, x+30, y+30, fill="white")
+        canvas.create_oval(x, y, x+30, y+30, fill="red")
     canvas.create_text(x+15, y+15, text=current_node.key)
 
     # Draw each linked node.
@@ -24,7 +27,7 @@ def display(current_node: fibonacci_heap.Node,
     for child in range(current_node.degree):
 
         # Draw Parent Links
-        canvas.create_line(x+15, y+30, x+offset+15, y+100)
+        canvas.create_line(x+15, y+30, x+offset+15, y+100, arrow=tk.LAST)
 
         # Draw Child Links
         display(current_child, min_node, x+offset, y+100)
@@ -33,14 +36,14 @@ def display(current_node: fibonacci_heap.Node,
         if current_child != current_node.child.left:
             # Draw right line
             offset2 = offset + 60 + (2**child * 30)
-            canvas.create_line(x+30+offset, y+115, x+offset2, y+115)
+            canvas.create_line(x+30+offset, y+115, x+offset2, y+115, arrow=tk.BOTH)
             offset = offset2
 
         # Iterate child.
         current_child = current_child.right
     
     if current_node.parent == None and current_node.right != min_node:
-        canvas.create_line(x+30, y+15, x+240, y+15)
+        canvas.create_line(x+30, y+15, x+240, y+15, arrow=tk.BOTH)
         display(current_node.right, min_node, x+240, y)
 
 def run_heap():
