@@ -115,13 +115,13 @@ class FibonacciHeap:
         node.right = self.min
         node.left = self.min.left
         self.min.left = node
-        node.parent = None
+        # node.parent = None
         node.mark = False
     
     # Cut all parent/grandparent nodes that are marked.
-    def _cascade_cut(self, node):
-        parent = node.parent
-        if parent != None:
+    def _cascade_cut(self, node: Node):
+        if node.parent != None:
+            parent = node.parent
             if parent.mark == False:
                 parent.mark = True
             else:
@@ -138,22 +138,17 @@ class FibonacciHeap:
         # 1. return if current node is key.
         # 2. search lower.
         # 3. search right.
-        # 4. search next tree.
         if current_node.key == key:
             return current_node
-        elif current_node.child != None and current_node.key < key:
-            current_node = current_node.child
-            current_root = current_node
-            return self.search(key, current_node, current_tree, current_root)
-        elif current_node.right != current_root:
-            return self.search(key, current_node.right, current_tree, current_root)
-        elif current_tree.right != self.min:
-            current_tree = current_tree.right
-            current_node = current_tree
-            current_root = self.min
-            return self.search(key, current_node, current_tree, current_root)
+        if current_node.child != None and current_node.key < key:
+            found = self.search(key, current_node.child, current_tree, current_node.child)
+            if found != None:
+                return found
+        if current_node.right != current_root:
+            found = self.search(key, current_node.right, current_tree, current_root)
+            if found != None:
+                return found
         else:
-            print("Node not in tree")
             return None
     
     # Insert a new node into the FibonacciHeap.
@@ -175,7 +170,7 @@ class FibonacciHeap:
         self.num_nodes += 1
     
     # Remove the node from the FibonacciHeap.
-    def delete(self, node):
+    def delete(self, node: Node):
         # Make the node the new min and extract it.
         self.decrease_key(node, 0)
         self.extract_min()
@@ -232,12 +227,14 @@ class FibonacciHeap:
         self.num_nodes += other.num_nodes
     
     # Decrease the key value of the given node.
-    def decrease_key(self, node, newKey):
+    def decrease_key(self, node: Node, newKey: int):
         # Update key value.
         node.key = newKey
         # Cut if node is not in root list and new key is less than parents key.
         if node.parent != None and node.key < node.parent.key:
+            print(type(node.parent))
             self._cut(node, node.parent)
+            print(type(node.parent))
             self._cascade_cut(node.parent)
         # Change min node if new key is less than current minimum key.
         if (node.key < self.min.key):
