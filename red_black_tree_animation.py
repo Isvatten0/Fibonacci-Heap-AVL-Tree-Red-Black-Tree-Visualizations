@@ -9,7 +9,7 @@ highlight = 3
 class Node:
     def __init__(self, value, black, left=None, right=None):
         self.value = value
-        self.black = black
+        self.isNodeblack = black
         self.left = left
         self.right = right
 
@@ -28,10 +28,7 @@ class BinaryTree:
 
     def createNode(self, value, black):
         return Node(value, black)
-    # Reset recentItems
 
-    def clearRecents(self):
-        self.recentItems = [None]
     # Calculate the height of black nodes only,
     # which must be constant for the left and right branches of a red-black tree.
 
@@ -40,17 +37,7 @@ class BinaryTree:
             return 1, 1
         altBlackleft, altRedleft = self.getLevel(root.left)
         altBlackRight, altRedRight = self.getLevel(root.right)
-        return root.black + max(altBlackleft, altBlackRight), not root.black + max(altRedleft, altRedRight)
-
-    # Calculate the height difference of black nodes between left and right branches
-
-    def getBlackBalance(self, root):
-        if (root == None):
-            return True
-        altBlackleft, altRedleft = self.getLevel(root.left)
-        altBlackRight, altRedRight = self.getLevel(root.right)
-        return (altBlackleft - altBlackRight == 0) and altRedleft <= altBlackleft and altRedRight <= altBlackRight
-    # Calculate the total height
+        return root.isNodeblack + max(altBlackleft, altBlackRight), not root.isNodeblack + max(altRedleft, altRedRight)
 
     def getHeight(self, root):
         if (root == None):
@@ -85,16 +72,16 @@ class BinaryTree:
     # "None" nodes are always black
 
     def isNodeBlack(self, Node):
-        return (Node.black if Node != None else True)
+        return (Node.isNodeblack if Node != None else True)
     # True if the Node is red, otherwise false
 
     def isNodeRed(self, Node):
-        return (not Node.black if Node != None else False)
+        return (not Node.isNodeblack if Node != None else False)
     # Returns the Node with the modified black attribute (default: True, or Black)
 
     def setNodeToBlack(self, Node, black=True):
         if (Node != None and Node.value != None):
-            Node.black = black
+            Node.isNodeblack = black
             self.recentItems.append(Node.value)
             return Node
         return
@@ -102,7 +89,7 @@ class BinaryTree:
 
     def setNodeToRed(self, Node, black=False):
         if (Node != None and Node.value != None):
-            Node.black = black
+            Node.isNodeblack = black
             self.recentItems.append(Node.value)
             return Node
         return
@@ -110,9 +97,17 @@ class BinaryTree:
     # Returns the two input Nodes, with their black attributes swapped
 
     def swapNodeColor(self, Node1, Node2):
-        Node1_blackness = self.isNodeBlack(Node1)
-        Node1 = self.setNodeToBlack(Node1, black=self.isNodeBlack(Node2))
-        Node2 = self.setNodeToBlack(Node2, black=Node1_blackness)
+        if Node1 is not None:
+            Node1_blackness = Node1.isNodeblack
+        else:
+            Node1_blackness = True
+        # Node1_blackness = self.isNodeBlack(Node1)
+        if Node2 is not None:
+            black = Node2.isNodeblack
+        else:
+            black = True
+        Node1 = self.setNodeToBlack(Node1, black)
+        Node2 = self.setNodeToBlack(Node2, black = Node1_blackness)
         self.recentItems.extend([Node1.value, Node2.value])
         return Node1, Node2
     # Initialize the insert recursion
@@ -120,7 +115,7 @@ class BinaryTree:
 
     def insert(self, value, root):
         root, case = self.insertNode(value, root)
-        root.black = True
+        root.isNodeblack = True
         self.recentItems.append(None)
         return root
     # Common recursive binary insertion, added balancing for red-black tree
@@ -137,22 +132,22 @@ class BinaryTree:
             return Node, 1
         if (value < root.value):  # Recursive for the left branch
             root.left, case = self.insertNode(value, root.left)
-            tio = root.right
+            uncle = root.right
         elif (value > root.value):  # Recursive for the right branch
             root.right, case = self.insertNode(value, root.right)
-            tio = root.left
+            uncle = root.left
         else:  # repeated value, so case = 0
             self.recentItems = []
             return root, 0
 
         if (case == 1):
             # If father is black, you don't need to modify anything else.
-            if (root.black):
+            if (root.isNodeblack):
                 case = 0
             else:  # If not, it will depend on the uncle, so one must return to the grandfather.
                 case = 2
         elif (case == 2):
-            if (self.isNodeBlack(tio)):  # If the uncle is black, the operation is similar to the AVL tree
+            if (self.isNodeBlack(uncle)):  # If the uncle is black, the operation is similar to the AVL tree
                 Balance = self.getBalance(root)
                 if (Balance > 1):  # Unbalanced to left
                     if (value > root.left.value):  # Left - Right, if not Left - Left
@@ -180,13 +175,13 @@ class BinaryTree:
     def setNodeToDoubleBlack(self, Node):
         if (Node == None):
             return self.createNode(None, 2)
-        Node.black = 2
+        Node.isNodeblack = 2
         self.recentItems.append(Node.value)
         return Node
     # Test if the Node is "double black", or black = 2
 
     def isNodeDoubleBlack(self, Node):
-        return (Node.black == 2 if Node != None else False)
+        return (Node.isNodeblack == 2 if Node != None else False)
     # Returns the largest Node on the left-left branch
 
     def findRightNode(self, Node):
@@ -206,10 +201,10 @@ class BinaryTree:
             del root
             return
         elif (root.value == valueAtual):
-            if (root.black):
+            if (root.isNodeblack):
                 self.recentItems[:] = [
                     value for value in self.recentItems if value != root.value]
-        root.black = True
+        root.isNodeblack = True
         self.recentItems.append(self.recentItems.pop(0))
         self.recentItems.insert(0, None)
         return root
@@ -266,7 +261,7 @@ class BinaryTree:
             cousin = False
         # If there is a double black, there will be a valid brother.
         if (brother != None):
-            if (brother.black):  # If the brother is BLACK
+            if (brother.isNodeblack):  # If the brother is BLACK
                 if (cousin):
                     # Undo the substitute's double black condition
                     root.left = self.setNodeToBlack(root.left)
@@ -318,53 +313,6 @@ class BinaryTree:
                     root.left = self.setNodeToBlack(root.left)
                     root.right = self.DeleteNode(value, root.right)
         return root
-   # Rebuilds the tree from a list produced by the 'RBT_list' function, below
-
-    def reinsert(self, value, black, root):
-        if (root == None):
-            return self.createNode(value, black)
-        if (value < root.value):
-            root.left = self.reinsert(value, black, root.left)
-        elif (value > root.value):
-            root.right = self.reinsert(value, black, root.right)
-        return root
-
-    def isFamilyBlack(self, root):
-        if (root == None or root.left == None or root.right == None):
-            return False
-        return self.isNodeBlack(root) and self.isNodeBlack(root.left) and self.isNodeBlack(root.right) and self.isNodeBlack(root.left.left) and self.isNodeBlack(root.left.right) and self.isNodeBlack(root.right.left) and self.isNodeBlack(root.right.right)
-
-    def fixColor(self, root):
-        self.recentItems = [None]
-        if (root == None):
-            return
-        list = []
-        listHelper = [root]
-        FamilyRed = False
-        while listHelper:
-            for Node in listHelper:
-                if (not self.isFamilyBlack(Node)):
-                    FamilyRed = True
-            while listHelper:
-                Node = listHelper.pop()
-                if (not FamilyRed):
-                    Node.left = self.setNodeToRed(Node.left)
-                    Node.right = self.setNodeToRed(Node.right)
-                    self.recentItems.extend(
-                        [Node.left.value, Node.right.value])
-                    list.append(Node.left)
-                    list.append(Node.right)
-                else:
-                    list.append(Node)
-            FamilyRed = False
-            while list:
-                Node = list.pop()
-                if (Node.left != None):
-                    listHelper.append(Node.left)
-                if (Node.right != None):
-                    listHelper.append(Node.right)
-        self.recentItems.append(None)
-        return root
 
     def searchForValue(self, value, root):
         if (root != None):
@@ -376,20 +324,6 @@ class BinaryTree:
                 return self.searchForValue(value, root.right)
         return
 
-    def BFS_tree_list(self, root):
-        if (root == None):
-            return
-        list = [root]
-        rebuildList = []
-        while list:
-            Node = list.pop(0)
-            if (Node.left != None):
-                list.append(Node.left)
-            if (Node.right != None):
-                list.append(Node.right)
-            rebuildList.append(Node.value)
-        return rebuildList
-
 
 class Visualization:
 
@@ -400,10 +334,6 @@ class Visualization:
         # create a frame as the main container for UI elements
         self.frame = Frame(root)
         self.frame.pack()
-
-        # create a canvas for displaying the tree
-        self.canvas = Canvas(root, width=1400, height=768, bg='grey')
-        self.canvas.pack()
 
         # create a label for the number entry
         self.label = Label(self.frame, text="Number:")
@@ -448,6 +378,10 @@ class Visualization:
         self.message_label = Label(self.secondFrame, text="")
         self.message_label.pack(side=RIGHT)
 
+        # create a canvas for displaying the tree
+        self.canvas = Canvas(root, width=1400, height=768, bg='grey')
+        self.canvas.pack()
+
         # initialize the size of the nodes
         self.size = 30
         self.BinaryTree = BinaryTree()
@@ -487,11 +421,11 @@ class Visualization:
                 self.message_label.config(text=self.message)
 
             # Insert the new value into the binary tree
-            self.root = self.BinaryTree.insert(value, self.root)
+            self.root = self.BinaryTree.insert(int(value), self.root)
 
             # If the value has already been inserted, set it as the value to be found
             if (self.BinaryTree.recentItems[0] == None):
-                self.find = value
+                self.find = int(value)
                 self.message = "{} has already been inserted".format(
                     str(value))
                 self.message_label.config(text=self.message)
@@ -553,37 +487,6 @@ class Visualization:
         # Reset find value
         self.find = None
 
-    def searchTree(self, *args):
-        """
-        Searches the tree for a value and reports if it is found
-        """
-        # Retrieve the value from the entry widget
-        try:
-            value = int(self.entry.get())
-        except Exception:
-            # Return if value cannot be converted to an integer
-            return
-
-        # Reset the message label text and update it to indicate the search is in progress
-        self.message = ""
-        self.message_label.config(text=self.message)
-        self.message = "Searching for {}...".format(str(value))
-        self.message_label.config(text=self.message)
-
-        # Call the `searchForValue` method of the `BinaryTree` class to find the node
-        Node = self.BinaryTree.searchForValue(value, self.root)
-
-        # Check if the node was found or not
-        if (Node == None):
-            self.message = "{} was not found".format(str(value))
-            self.message_label.config(text=self.message)
-        else:
-            self.message = "{} was found".format(str(value))
-            self.message_label.config(text=self.message)
-            self.find = value
-            self.drawTree()
-            self.find = None
-
     def deleteNode(self, *args):
         """
         Deletes node from tree
@@ -615,6 +518,37 @@ class Visualization:
 
         # Redraw the tree
         self.drawTree()
+
+    def searchTree(self, *args):
+        """
+        Searches the tree for a value and reports if it is found
+        """
+        # Retrieve the value from the entry widget
+        try:
+            value = int(self.entry.get())
+        except Exception:
+            # Return if value cannot be converted to an integer
+            return
+
+        # Reset the message label text and update it to indicate the search is in progress
+        self.message = ""
+        self.message_label.config(text=self.message)
+        self.message = "Searching for {}...".format(str(value))
+        self.message_label.config(text=self.message)
+
+        # Call the `searchForValue` method of the `BinaryTree` class to find the node
+        Node = self.BinaryTree.searchForValue(value, self.root)
+
+        # Check if the node was found or not
+        if (Node == None):
+            self.message = "{} was not found".format(str(value))
+            self.message_label.config(text=self.message)
+        else:
+            self.message = "{} was found".format(str(value))
+            self.message_label.config(text=self.message)
+            self.find = value
+            self.drawTree()
+            self.find = None
 
     def drawTree(self):
         """
