@@ -16,6 +16,7 @@ class AVL_Display:
         self.treeCanvasHeight = 880
         self.treePositions = [] #Possible positions in the tree
         self.displayArray = [] #Holds tuples of the form (key, oval, text, positionIndex)
+        self.treeLines = []
         self.treeRoot = None #Nodes currently in the tree
         self.nodeSize = 30 #Diameter of a node
         self.tolerance = tolerance #How much imbalance is acceptable
@@ -86,6 +87,33 @@ class AVL_Display:
         self.treeCanvas.coords(text, self.getcoord(self.treePositions[index]))
         self.window.update()
 
+    def drawlines(self):
+        self.eraselines()
+        for object in self.displayArray:
+            posIndex = 0
+            node = self.treeRoot
+            while node != None:
+                if object[0] == node.key:
+                    if posIndex > 0:
+                        line = self.treeCanvas.create_line(self.getcoord(self.treePositions[self.parentindex(posIndex)]), self.getcoord(self.treePositions[posIndex]))
+                        self.treeCanvas.tag_lower(line)
+                        self.treeLines.append(line)
+                    break
+                elif object[0] < node.key:
+                    posIndex = self.lchildindex(posIndex)
+                    node = node.left
+                else:
+                    posIndex = self.rchildindex(posIndex)
+                    node = node.right
+        self.window.update()
+
+    def eraselines(self):
+        while len(self.treeLines) > 0:
+            self.treeCanvas.delete(self.treeLines[0])
+            self.treeLines.pop(0)
+        self.window.update()
+            
+
     def movetree(self):
         if self.treeNeedsMove:
             time.sleep(self.sleepTime)
@@ -93,12 +121,13 @@ class AVL_Display:
             for tuple in self.displayArray:
                 newIndex = self.getpositionindex(tuple[0])
                 self.moveobject(tuple, newIndex)
+        self.drawlines()
 
 
     def createnodeobject(self, key, index):
         oval = self.treeCanvas.create_oval(self.getnodecoord(self.treePositions[index]), fill=self.baseColor)
         text = self.treeCanvas.create_text(self.getcoord(self.treePositions[index]), fill="black", text= str(key), font=self.font)
-        self.displayArray.append((key, oval, text, index))
+        self.displayArray.append((key, oval, text))
 
     def deletenodeobject(self, object):
         self.treeCanvas.delete(object[1])
@@ -186,7 +215,6 @@ class AVL_Display:
 
         self.updateHeight(node)
         self.updateHeight(rightNode)
-        #self.movetree() #test
         return rightNode
 
     def rotate(self, node: AVLnode):
@@ -194,11 +222,13 @@ class AVL_Display:
         if balance > self.tolerance: 
             if self.balance(node.left) < self.negTolerance + 1:
                 node.left = self.rotateLeft(node.left) #LR rotation case
+            self.movetree()
             return self.rotateRight(node) #RR rotation case
         
         if balance <  self.negTolerance:
             if self.balance(node.right) > self.tolerance - 1:
                 node.right = self.rotateRight(node.right) #RL rotation case
+            self.movetree()
             return self.rotateLeft(node) #LL rotation case
         return node
 
@@ -229,6 +259,7 @@ class AVL_Display:
                 if node.left == None:
                     node.left = AVLnode(key)
                     self.createnodeobject(key, self.lchildindex(index)) 
+                    self.drawlines()
                     break
                 else:
                     node = node.left
@@ -238,6 +269,7 @@ class AVL_Display:
                 if node.right == None:
                     node.right = AVLnode(key)
                     self.createnodeobject(key, self.rchildindex(index)) 
+                    self.drawlines()
                     break
                 else:
                     node = node.right
