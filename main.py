@@ -11,10 +11,10 @@ def display(current_node: fibonacci_heap.Node,
             x: int,
             y: int,) -> int:
     canvas.configure(background='grey')
-    text = Label(canvas, text="Fibonnaci Heap")
-    text.place(x=350,y=50)
+    # text = Label(canvas, text="Fibonnaci Heap")
+    # text.place(x=350,y=50)
 
-    # Draw node
+    # Draw node.
     if current_node.mark == True:
         canvas.create_oval(x, y, x+30, y+30, fill="blue")
     else:
@@ -23,7 +23,7 @@ def display(current_node: fibonacci_heap.Node,
 
     # Draw each linked node.
     current_child = current_node.child
-    offset = -30 * (2**(current_node.degree-2)) * (current_node.degree-1) / 2
+    offset = -30 * (2**(current_node.degree-3)) * (current_node.degree-1) / 2
     for child in range(current_node.degree):
 
         # Draw Parent Links
@@ -35,7 +35,7 @@ def display(current_node: fibonacci_heap.Node,
         # Draw Sibling Links
         if current_child != current_node.child.left:
             # Draw right line
-            offset2 = offset + 60 + (2**child * 30)
+            offset2 = offset + (2**child * 30) + 60
             canvas.create_line(x+30+offset, y+115, x+offset2, y+115, arrow=tk.BOTH)
             offset = offset2
 
@@ -43,22 +43,28 @@ def display(current_node: fibonacci_heap.Node,
         current_child = current_child.right
     
     if current_node.parent == None and current_node.right != min_node:
-        canvas.create_line(x+30, y+15, x+240, y+15, arrow=tk.BOTH)
-        display(current_node.right, min_node, x+240, y)
+        tree_offset = current_node.right.degree * 60 + 120
+        canvas.create_line(x+30, y+15, x+tree_offset, y+15, arrow=tk.BOTH)
+        display(current_node.right, min_node, x+tree_offset, y)
 
 def run_heap():
     FH = fibonacci_heap.FibonacciHeap()
     for i in range(26):
         FH.insert(i)
+        canvas.delete('all')
+        canvas.create_text(600, 50, text=f'Insert {i}', font=('Arial',50))
+        display(FH.min, FH.min, 181, 100)
+        time.sleep(4)
         if i % 5 == 1:
             FH.extract_min()
-        time.sleep(1)
-        canvas.delete('all')
-        display(FH.min, FH.min, 181, 100)
-    # x = FH.search(18)
-    # FH.delete(x)
-    # display(FH.min, FH.min, 181, 100)
-    # window.attributes('-fullscreen',True)
+            canvas.delete('all')
+            canvas.create_text(600, 50, text=f'Extract minimum node', font=('Arial',50))
+            display(FH.min, FH.min, 181, 100)
+            time.sleep(4)
+    FH.delete(FH.search(18))
+    canvas.delete('all')
+    canvas.create_text(600, 50, text=f'Delete 18', font=('Arial',50))
+    display(FH.min, FH.min, 181, 100)
 
 # Create Window
 window = tk.Tk()

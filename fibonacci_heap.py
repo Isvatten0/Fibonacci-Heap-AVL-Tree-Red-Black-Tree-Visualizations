@@ -106,7 +106,7 @@ class FibonacciHeap:
         if node == node.right:
             parent.child = None
         else:
-            parent.child = node.left
+            parent.child = node.right
             node.left.right = node.right
             node.right.left = node.left              
         parent.degree =- 1
@@ -115,7 +115,7 @@ class FibonacciHeap:
         node.right = self.min
         node.left = self.min.left
         self.min.left = node
-        # node.parent = None
+        node.parent = None
         node.mark = False
     
     # Cut all parent/grandparent nodes that are marked.
@@ -232,10 +232,9 @@ class FibonacciHeap:
         node.key = newKey
         # Cut if node is not in root list and new key is less than parents key.
         if node.parent != None and node.key < node.parent.key:
-            print(type(node.parent))
-            self._cut(node, node.parent)
-            print(type(node.parent))
-            self._cascade_cut(node.parent)
+            parent = node.parent
+            self._cut(node, parent)
+            self._cascade_cut(parent)
         # Change min node if new key is less than current minimum key.
         if (node.key < self.min.key):
             self.min = node
