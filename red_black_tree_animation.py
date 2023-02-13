@@ -398,7 +398,7 @@ class Visualization:
         """
         # A list of hardcoded and shuffled numbers
         hardcoded_and_shuffled_list = [
-            12, 5, 9, 4, 17, 3, 7, 20, 16, 19, 0, 6, 1, 10, 18, 15, 14, 2, 11, 8, 13]
+            12, 5, 9, 4, 17, 3, 7, 20, 16, 19, 0, 6, 1, 10, 18, 15, 14, 2, 11, 8, 13, -1]
         # numbers = list(range(0, 21))  # Create a list of numbers 0 to 20
 
         # Resetting the message label and disabling the run button
