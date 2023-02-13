@@ -1,328 +1,408 @@
-# Created by the Balanced Fibs:
+# Created by the Balanced Fibs: Bryson Duckworth, Alyssa Gabrielson, Will Miller,
+#                               Riley Parker, Sydney Pierce, Luke Roberts, & Joey Walker
 
 from tkinter import *
 import time
 
-highlight = 3
+# set the size of the highlight for the nodes
+highlight = 4
 
 
 class Node:
+    # Initialized the Node class and its variables
     def __init__(self, value, black, left=None, right=None):
         self.value = value
-        self.isNodeblack = black
-        self.left = left
-        self.right = right
+        self.is_node_nlack = black
+        self.left_child = left
+        self.right_child = right
 
 
-class BinaryTree:
-    # recentItems are the Nodes changed / created in the last insertion or removal.
-    # The first element is the principal,
-    # because it is either the inserted Node or the replacement for the removed one.
+class RBT:
+
+    # Initialize recent items with root node or None
     def __init__(self, root=None):
         self.root = root
-        if (root != None):
-            self.recentItems = [root.value, None]
-        else:
-            self.recentItems = [None]
-    # Node Node
+        self.recentItems = [root.value if root else None, None]
 
-    def createNode(self, value, black):
-        return Node(value, black)
-
-    # Calculate the height of black nodes only,
-    # which must be constant for the left and right branches of a red-black tree.
-
-    def getLevel(self, root):
-        if (root == None):
-            return 1, 1
-        altBlackleft, altRedleft = self.getLevel(root.left)
-        altBlackRight, altRedRight = self.getLevel(root.right)
-        return root.isNodeblack + max(altBlackleft, altBlackRight), not root.isNodeblack + max(altRedleft, altRedRight)
-
-    def getHeight(self, root):
-        if (root == None):
-            return 0
-        return 1 + max(self.getHeight(root.left), self.getHeight(root.right))
-    # Calculates the total balance, which doesn't need to be as accurate as the AVL.
-
-    def getBalance(self, root):
-        if (root == None):
-            return 0
-        return self.getHeight(root.left) - self.getHeight(root.right)
-    # Rotate Right
-
-    def rotateRight(self, oldRoot):
-        newRoot = oldRoot.left
-        oldRoot.left, newRoot.right = newRoot.right, oldRoot
-        if (oldRoot.value == self.recentItems[0]):
-            self.recentItems[0] = newRoot.value
-        self.recentItems.extend([oldRoot.value, newRoot.value, oldRoot.left])
-        return newRoot
-        # Rotate left
-
-    def rotateleft(self, oldRoot):
-        newRoot = oldRoot.right
-        oldRoot.right, newRoot.left = newRoot.left, oldRoot
-        if (oldRoot.value == self.recentItems[0]):
-            self.recentItems[0] = newRoot.value
-        self.recentItems.extend([oldRoot.value, newRoot.value, oldRoot.right])
-        return newRoot
-
-    # True if the Node is black or None, else false
-    # "None" nodes are always black
-
-    def isNodeBlack(self, Node):
-        return (Node.isNodeblack if Node != None else True)
-    # True if the Node is red, otherwise false
-
-    def isNodeRed(self, Node):
-        return (not Node.isNodeblack if Node != None else False)
-    # Returns the Node with the modified black attribute (default: True, or Black)
-
-    def setNodeToBlack(self, Node, black=True):
-        if (Node != None and Node.value != None):
-            Node.isNodeblack = black
-            self.recentItems.append(Node.value)
-            return Node
-        return
-    # Returns the Node with the modified black attribute (default: False, or Red)
-
-    def setNodeToRed(self, Node, black=False):
-        if (Node != None and Node.value != None):
-            Node.isNodeblack = black
-            self.recentItems.append(Node.value)
-            return Node
-        return
-
-    # Returns the two input Nodes, with their black attributes swapped
-
-    def swapNodeColor(self, Node1, Node2):
-        if Node1 is not None:
-            Node1_blackness = Node1.isNodeblack
-        else:
-            Node1_blackness = True
-        # Node1_blackness = self.isNodeBlack(Node1)
-        if Node2 is not None:
-            black = Node2.isNodeblack
-        else:
-            black = True
-        Node1 = self.setNodeToBlack(Node1, black)
-        Node2 = self.setNodeToBlack(Node2, black = Node1_blackness)
-        self.recentItems.extend([Node1.value, Node2.value])
-        return Node1, Node2
-    # Initialize the insert recursion
-    # Root is always BLACK.
+    # Insert value into binary search tree and maintain red-black properties
 
     def insert(self, value, root):
-        root, case = self.insertNode(value, root)
-        root.isNodeblack = True
+        root, option = self.insert_node(value, root)
+        root.is_node_nlack = True
         self.recentItems.append(None)
         return root
-    # Common recursive binary insertion, added balancing for red-black tree
-    # About the "case" variable:
-    # If 0 means no more modifications needed
-    # If 1 means that the current Node(root) is the father of the inserted Node
-    # If 2 means that the current Node (root) is the grandfather of the entered Node
 
-    def insertNode(self, value, root):
-        # The value does not exist, so a corresponding Node is created. Always RED.
+    # Common recursive binary insertion, added balancing for red-black tree
+    def insert_node(self, value, root):
+        # If the root is None, create a new node for the value and return it as the new root
         if (root == None):
-            Node = self.createNode(value, False)
+            rootNode = Node(value, False)  # Always insert new nodes as RED
             self.recentItems = [value]
-            return Node, 1
-        if (value < root.value):  # Recursive for the left branch
-            root.left, case = self.insertNode(value, root.left)
-            uncle = root.right
-        elif (value > root.value):  # Recursive for the right branch
-            root.right, case = self.insertNode(value, root.right)
-            uncle = root.left
-        else:  # repeated value, so case = 0
+            return rootNode, 1
+
+        # If the value is less than the root's value, insert it in the left subtree
+        if (value < root.value):
+            root.left_child, option = self.insert_node(value, root.left_child)
+            uncle = root.right_child  # Uncle node for the newly inserted node
+
+        # If the value is greater than the root's value, insert it in the right subtree
+        elif (value > root.value):
+            root.right_child, option = self.insert_node(
+                value, root.right_child)
+            uncle = root.left_child  # Uncle node for the newly inserted node
+
+        # If the value already exists, do not insert it and set option to 0
+        else:
             self.recentItems = []
             return root, 0
 
-        if (case == 1):
-            # If father is black, you don't need to modify anything else.
-            if (root.isNodeblack):
-                case = 0
-            else:  # If not, it will depend on the uncle, so one must return to the grandfather.
-                case = 2
-        elif (case == 2):
-            if (self.isNodeBlack(uncle)):  # If the uncle is black, the operation is similar to the AVL tree
-                Balance = self.getBalance(root)
-                if (Balance > 1):  # Unbalanced to left
-                    if (value > root.left.value):  # Left - Right, if not Left - Left
-                        root.left = self.rotateleft(root.left)
-                    root = self.rotateRight(root)
-                    # The difference to the AVL is in this color change between root and uncle
-                    root.right, root = self.swapNodeColor(root.right, root)
-                    case = 0  # At the end, no further modifications are needed
-                elif (Balance < - 1):  # Right Unbalanced
-                    if (value < root.right.value):  # Right - Left, if not Right - Right
-                        root.right = self.rotateRight(root.right)
-                    root = self.rotateleft(root)
-                    # The difference to the AVL is in this color change between root and uncle
-                    root.left, root = self.swapNodeColor(root.left, root)
-                    case = 0  # At the end, no further modifications are needed
-            else:  # If the uncle is red, paint the father and uncle black, the grandfather red, and consider the grandfather the new son
-                root.left = self.setNodeToBlack(root.left)
-                root.right = self.setNodeToBlack(root.right)
-                root = self.setNodeToRed(root)
-                case = 1  # Grandfather (current node) becomes a son.
-        return root, case
-    # Returns the Node with attribute black = 2
-    # It is a special Node to be used temporarily in the removal process
+        if (option == 1):
+            # If the father node is black, no modifications are needed
+            if (root.is_node_nlack):
+                option = 0
 
-    def setNodeToDoubleBlack(self, Node):
+            # If the father node is red, the behavior depends on the uncle node
+            else:
+                option = 2
+
+        elif (option == 2):
+            # If the uncle node is black, balance the tree
+            if (self.is_node_nlack(uncle)):
+                Balance = self.get_balance(root)
+                # Left unbalanced
+                if (Balance > 1):
+                    # Left-Right option
+                    if (value > root.left_child.value):
+                        root.left_child = self.rotate_left(root.left_child)
+                    root = self.rotate_right(root)
+
+                    # Swap the colors of the root and the uncle node
+                    root.right_child, root = self.swap_node_color(
+                        root.right_child, root)
+                    option = 0  # No further modifications are needed
+
+                # Right unbalanced
+                elif (Balance < - 1):
+
+                    # Right-Left option
+                    if (value < root.right_child.value):
+                        root.right_child = self.rotate_right(root.right_child)
+
+                    root = self.rotate_left(root)
+                    # Swap the colors of the root and the uncle node
+                    root.left_child, root = self.swap_node_color(
+                        root.left_child, root)
+                    option = 0  # No further modifications are needed
+
+            else:  # If the uncle node is red, change the colors of the father, uncle, and grandfather nodes
+                root.left_child = self.set_node_to_black(root.left_child)
+                root.right_child = self.set_node_to_black(root.right_child)
+                root = self.set_node_to_red(root)
+                option = 1  # The grandfather node becomes a son node in the next iteration
+
+        return root, option
+
+    # Function for rotating nodes to the right
+    def rotate_right(self, oldRoot):
+        # The left child of the old root becomes the new root
+        newRoot = oldRoot.left_child
+        # The right child of the new root becomes the left child of the old root
+        oldRoot.left_child, newRoot.right_child = newRoot.right_child, oldRoot
+        # If the old root was the most recently added node, update the most recent item
+        if (oldRoot.value == self.recentItems[0]):
+            self.recentItems[0] = newRoot.value
+        # Add the values of the old root and its left child to the recent items list
+        self.recentItems.extend(
+            [oldRoot.value, newRoot.value, oldRoot.left_child])
+        return newRoot
+
+        # Rotate left
+
+    def rotate_left(self, oldRoot):
+        # Set the new root to be the right child of the old root
+        newRoot = oldRoot.right_child
+        # Reassign the children of the old and new root to complete the rotation
+        oldRoot.right_child, newRoot.left_child = newRoot.left_child, oldRoot
+        # If the old root was the most recently inserted node, update the reference in recentItems
+        if (oldRoot.value == self.recentItems[0]):
+            self.recentItems[0] = newRoot.value
+        # Add the relevant nodes to the recentItems list
+        self.recentItems.extend(
+            [oldRoot.value, newRoot.value, oldRoot.right_child])
+        # Return the new root
+        return newRoot
+
+    # Gets the height of the tree
+    def get_height(self, root):
+        if (root == None):
+            return 0
+        return 1 + max(self.get_height(root.left_child), self.get_height(root.right_child))
+
+    # Gets the difference between the heights of the sides of the tree with a tolerance of 1:-1
+    def get_balance(self, root):
+        if (root == None):
+            return 0
+        return self.get_height(root.left_child) - self.get_height(root.right_child)
+
+    # Returns if a node is black or not
+    def is_node_nlack(self, Node):
+        return (Node.is_node_nlack if Node != None else True)
+
+    # Returns if a node is red or not
+    def is_node_red(self, Node):
+        return (not Node.is_node_nlack if Node != None else False)
+
+    # Sets the node to black and returns an updated node
+    def set_node_to_black(self, Node, black=True):
+        if (Node != None and Node.value != None):
+            Node.is_node_nlack = black
+            self.recentItems.append(Node.value)
+            return Node
+        return
+
+    # Sets the node to red and returns an updated node
+    def set_node_to_red(self, Node, black=False):
+        if (Node != None and Node.value != None):
+            Node.is_node_nlack = black
+            self.recentItems.append(Node.value)
+            return Node
+        return
+
+    # swaps a node's colors
+    def swap_node_color(self, Node1, Node2):
+        # Store the color of both nodes
+        if Node1 is not None:
+            Node1_color = Node1.is_node_nlack
+        else:
+            Node1_color = True
+        if Node2 is not None:
+            black = Node2.is_node_nlack
+        else:
+            black = True
+
+        # Set the color of both nodes to the stored values
+        Node1 = self.set_node_to_black(Node1, black)
+        Node2 = self.set_node_to_black(Node2, black=Node1_color)
+
+        # Add the values of both nodes to the recentItems list
+        self.recentItems.extend([Node1.value, Node2.value])
+
+        # Return both nodes
+        return Node1, Node2
+
+    # Returns if a node is double black or not
+    def is_node_double_black(self, Node):
+        return (Node.is_node_nlack == 2 if Node != None else False)
+
+    # sets a node to double black
+    def set_node_to_double_black(self, thisNode):
+        # Check if the given node is `None`
         if (Node == None):
-            return self.createNode(None, 2)
-        Node.isNodeblack = 2
+            # Create a new node with value `None` and color `2` (double black)
+            tempNode = Node(None, 2)
+            return tempNode
+        # Set the color of the given node to double black (2)
+        thisNode.is_node_nlack = 2
+        # Append the value of the given node to the `recentItems` list
         self.recentItems.append(Node.value)
-        return Node
-    # Test if the Node is "double black", or black = 2
+        return thisNode
 
-    def isNodeDoubleBlack(self, Node):
-        return (Node.isNodeblack == 2 if Node != None else False)
-    # Returns the largest Node on the left-left branch
-
-    def findRightNode(self, Node):
-        if (Node.right != None):
-            return self.findRightNode(Node.right)
-        return Node
-    # Initialize the remove recursion
-    # Root is always BLACK
-
-    def Delete(self, value, root):
+    # deletes the node with the specified value from the Red-Black tree
+    def delete(self, value, root):
         if (root == None):
             return
+
+        # Reset the recentItems list
         self.recentItems = []
+
+        # Store the current root value
         valueAtual = root.value
-        root = self.DeleteNode(value, root)
+
+        # Call the delete_node method to delete the node with the specified value
+        root = self.delete_node(value, root)
+
+        # If the root's value is None, delete the root and return
         if (root.value == None):
             del root
             return
+        # If the root's value is equal to the current root value, check if it's black
         elif (root.value == valueAtual):
-            if (root.isNodeblack):
+            if (root.is_node_nlack):
+                # Remove the root's value from the recentItems list
                 self.recentItems[:] = [
                     value for value in self.recentItems if value != root.value]
-        root.isNodeblack = True
-        self.recentItems.append(self.recentItems.pop(0))
-        self.recentItems.insert(0, None)
-        return root
-    # Common binary removal, added balance repair for red-black tree
-    # At some point it is necessary to consider None as being a Node None with black = 2,
-    # that is, a double black None, however it is soon replaced by None.
+        # Set the root to black
+        root.is_node_nlack = True
 
-    def DeleteNode(self, value, root):
+        # Move the first item in the recentItems list to the end
+        self.recentItems.append(self.recentItems.pop(0))
+
+        # Insert None at the beginning of the recentItems list
+        self.recentItems.insert(0, None)
+
+        return root
+
+    def delete_node(self, value, root):
         if (root == None):  # value not found
+            # Append None to the recentItems list
             self.recentItems.append(None)
             return root
         if (root.value == None):  # Node None double black
             return root
         if (value < root.value):  # Recursive to the left
-            root.left = self.DeleteNode(value, root.left)
+            # Recursively call delete_node on the left child
+            root.left_child = self.delete_node(value, root.left_child)
         elif (value > root.value):  # Recursive to the right
-            root.right = self.DeleteNode(value, root.right)
+            # Recursively call delete_node on the right child
+            root.right_child = self.delete_node(value, root.right_child)
         else:
             # localized value, but contains both branches
-            if (root.left != None and root.right != None):
+            if (root.left_child != None and root.right_child != None):
                 # Find the largest sub-substitute on the left-hand branch
-                subs = self.findRightNode(root.left)
-                self.recentItems.append(subs.value)
-                root.value = subs.value  # Swap the values ​​of the current and substituted
-                # Recursive, on the left-hand branch, to Delete the new Node containing the value of value
-                root.left = self.DeleteNode(subs.value, root.left)
+                substitute = self.find_largest_node(root.left_child)
+                # Append the value of the found node to the recentItems list
+                self.recentItems.append(substitute.value)
+                # Swap the values of the current and substituted
+                root.value = substitute.value
+                # Recursive, on the left-hand branch, to delete the new Node containing the value of value
+                root.left_child = self.delete_node(
+                    substitute.value, root.left_child)
             else:  # value (re)located, with at least one branch None
-                if (root.left == None):
-                    subs = root.right  # The surrogate will be a "valid" child, if any, else None
+                if (root.left_child == None):
+                    # The surrogate will be a "valid" child, if any, else None
+                    substitute = root.right_child
                 else:
-                    subs = root.left
-                if (subs != None):
-                    self.recentItems.append(subs.value)
+                    substitute = root.left_child
+                if (substitute != None):
+                    # Append the value of the found node to the recentItems list
+                    self.recentItems.append(substitute.value)
                 else:
+                    # Append None to the recentItems list
                     self.recentItems.append(None)
                 # If either the surrogate or current child is RED, just set the surrogate to BLACK.
-                if (self.isNodeRed(root) or self.isNodeRed(subs)):
-                    subs = self.setNodeToBlack(subs)
+                if (self.is_node_red(substitute) or self.is_node_red(substitute)):
+                    substitute = self.set_node_to_black(substitute)
                 else:
                     # Otherwise, the replacement becomes double black (even if it is None), and you will need to rebalance.
-                    subs = self.setNodeToDoubleBlack(subs)
+                    substitute = self.set_node_to_double_black(substitute)
 
+                # delete the original node
                 del root
-                return subs
-        # if (root != None):
-        # rebalance
-        # First identify the sibling and its branch
+                return substitute
+
         brother = None
-        if (self.isNodeDoubleBlack(root.left)):
-            brother = root.right
+
+        # Check if the double black node is on the left branch
+        if (self.is_node_double_black(root.left_child)):
+            brother = root.right_child
             cousin = True
-        elif (self.isNodeDoubleBlack(root.right)):
-            brother = root.left
+        # Check if the double black node is on the right branch
+        elif (self.is_node_double_black(root.right_child)):
+            brother = root.left_child
             cousin = False
-        # If there is a double black, there will be a valid brother.
+
+        # If there is a double black node, there will be a valid brother node
         if (brother != None):
-            if (brother.isNodeblack):  # If the brother is BLACK
+            # If the brother node is BLACK
+            if (brother.is_node_nlack):
+                # If the double black node is on the left branch
                 if (cousin):
-                    # Undo the substitute's double black condition
-                    root.left = self.setNodeToBlack(root.left)
+                    # Undo the double black condition of the left branch
+                    root.left_child = self.set_node_to_black(root.left_child)
+                # If the double black node is on the right branch
                 else:
-                    root.right = self.setNodeToBlack(root.right)
-                # If the nephews are both BLACK (or None)
-                if (self.isNodeBlack(brother.left) and self.isNodeBlack(brother.right)):
-                    # brother is colored in RED
-                    brother = self.setNodeToRed(brother)
-                    if (self.isNodeBlack(root)):
-                        # father becomes double black if it is black
-                        root = self.setNodeToDoubleBlack(root)
+                    # Undo the double black condition of the right branch
+                    root.right_child = self.set_node_to_black(root.right_child)
+
+                # If both nephew nodes are BLACK (or None)
+                if (self.is_node_nlack(brother.left_child) and self.is_node_nlack(brother.right_child)):
+                    # Color the brother node in RED
+                    brother = self.set_node_to_red(brother)
+                    # If the root node is BLACK, make it double black
+                    if (self.is_node_nlack(root)):
+                        root = self.set_node_to_double_black(root)
+                    # If the root node is RED, make it BLACK (increase its black level by 1)
                     else:
-                        # Or black if RED (i.e. black level is increased by 1)
-                        root = self.setNodeToBlack(root)
-                else:  # If at least one nephew is red
-                    if (cousin):  # brother in Right branch
-                        if (self.isNodeBlack(brother.right)):  # Right - Left, if not Right - Right
-                            brother = self.rotateRight(brother)
-                            brother.right, brother = self.swapNodeColor(
-                                brother.right, brother)
-                        root.right = brother
-                        root = self.rotateleft(root)
-                        root.left, root = self.swapNodeColor(root.left, root)
-                        root.right = self.setNodeToBlack(
-                            root.right, black=self.isNodeBlack(root.left))
+                        root = self.set_node_to_black(root)
+                # If at least one nephew node is RED
+                else:
+                    # If the brother node is on the right branch
+                    if (cousin):
+                        # Right-Left rotation if the right nephew node is BLACK
+                        if (self.is_node_nlack(brother.right_child)):
+                            brother = self.rotate_right(brother)
+                            brother.right_child, brother = self.swap_node_color(
+                                brother.right_child, brother)
+                        # Update the right branch of the root node to be the brother node
+                        root.right_child = brother
+                        # Left rotation on the root node
+                        root = self.rotate_left(root)
+                        # Swap the colors of the root and left branches
+                        root.left_child, root = self.swap_node_color(
+                            root.left_child, root)
+                        # Make the right branch BLACK (even if it is None)
+                        root.right_child = self.set_node_to_black(
+                            root.right_child, black=self.is_node_nlack(root.left_child))
+
                     else:  # brother on the left-hand branch
-                        if (self.isNodeBlack(brother.left)):  # Left - Right, if not Left - Left
-                            brother = self.rotateleft(brother)
-                            brother.left, brother = self.swapNodeColor(
-                                brother.left, brother)
-                        root.left = brother
-                        root = self.rotateRight(root)
-                        root.right, root = self.swapNodeColor(root.right, root)
-                        root.left = self.setNodeToBlack(
-                            root.left, black=self.isNodeBlack(root.right))
-            # If the brother is RED, some Color rotation and swap operations are performed,
-            # to stop again if visiting the surrogate Node branch
-            # Note that the Node double - black has not been undone yet.
-            else:
+                        # Left - Right, if not Left - Left
+                        if (self.is_node_nlack(brother.left_child)):
+                            # Perform a left rotation on the brother
+                            brother = self.rotate_left(brother)
+                            # Swap colors of the brother and its left child
+                            brother.left_child, brother = self.swap_node_color(
+                                brother.left_child, brother)
+                        # Set the left child of root to the modified brother
+                        root.left_child = brother
+                        # Perform a right rotation on the root
+                        root = self.rotate_right(root)
+                        # Swap colors of the root and its right child
+                        root.right_child, root = self.swap_node_color(
+                            root.right_child, root)
+                        # Set the left child of root to black and maintain the same black level as the right child
+                        root.left_child = self.set_node_to_black(
+                            root.left_child, black=self.is_node_nlack(root.right_child))
+            else:  # If the brother is RED
                 if (cousin):  # If brother on the left-hand branch
-                    root = self.rotateleft(root)
-                    root.left, root = self.swapNodeColor(root.left, root)
-                    root.right = self.setNodeToBlack(root.right)
-                    root.left = self.DeleteNode(value, root.left)
+                    # Perform a left rotation on the root
+                    root = self.rotate_left(root)
+                    # Swap colors of the root and its left child
+                    root.left_child, root = self.swap_node_color(
+                        root.left_child, root)
+                    # Set the right child of root to black
+                    root.right_child = self.set_node_to_black(root.right_child)
+                    # Perform delete operation on the left child of root
+                    root.left_child = self.delete_node(value, root.left_child)
                 else:  # If brother in the Right branch
-                    root = self.rotateRight(root)
-                    root.right, root = self.swapNodeColor(root.right, root)
-                    root.left = self.setNodeToBlack(root.left)
-                    root.right = self.DeleteNode(value, root.right)
+                    # Perform a right rotation on the root
+                    root = self.rotate_right(root)
+                    # Swap colors of the root and its right child
+                    root.right_child, root = self.swap_node_color(
+                        root.right_child, root)
+                    # Set the left child of root to black
+                    root.left_child = self.set_node_to_black(root.left_child)
+                    # Perform delete operation on the right child of root
+                    root.right_child = self.delete_node(
+                        value, root.right_child)
+        # Return the modified root
         return root
 
-    def searchForValue(self, value, root):
+    # This function searches for a specific value in a red-black tree recursively.
+    def search_for_value(self, value, root):
         if (root != None):
             if (value == root.value):
                 return root
             elif (value < root.value):
-                return self.searchForValue(value, root.left)
+                return self.search_for_value(value, root.left_child)
             else:
-                return self.searchForValue(value, root.right)
+                return self.search_for_value(value, root.right_child)
         return
+
+    # Returns the largest Node
+    def find_largest_node(self, Node):
+        if (Node.right_child != None):
+            return self.find_largest_node(Node.right_child)
+        return Node
 
 
 class Visualization:
@@ -341,27 +421,27 @@ class Visualization:
 
         # create an entry for inputting the number
         self.entry = Entry(self.frame, justify="center", width=7)
-        self.entry.bind("<Return>", self.insertTree)
+        self.entry.bind("<Return>", self.insert_tree)
         self.entry.pack(side=LEFT)
 
         # create an insert button
         self.insertButton = Button(
-            self.frame, text="Insert", state="disabled", command=self.insertTree)
+            self.frame, text="Insert", state="disabled", command=self.insert_tree)
         self.insertButton.pack(side=LEFT)
 
         # create a delete button
         self.deleteButton = Button(
-            self.frame, text="Delete", state="disabled", command=self.deleteNode)
+            self.frame, text="delete", state="disabled", command=self.delete_node)
         self.deleteButton.pack(side=LEFT)
 
         # create a search button
         self.searchButton = Button(
-            self.frame, text="Search", state="disabled", command=self.searchTree)
+            self.frame, text="Search", state="disabled", command=self.search_tree)
         self.searchButton.pack(side=LEFT)
 
         # create a run button
         self.runButton = Button(
-            self.frame, text="Run", state="normal", command=self.insertTreeAnimation)
+            self.frame, text="Run", state="normal", command=self.insert_tree_animation)
         self.runButton.pack(side=LEFT)
 
         # create a checkbutton to toggle NIL nodes
@@ -384,15 +464,15 @@ class Visualization:
 
         # initialize the size of the nodes
         self.size = 30
-        self.BinaryTree = BinaryTree()
+        self.RBT = RBT()
         self.root = None
         self.Trees = [None]
         self.Index = 0
         self.find = None
-        self.drawTree()
+        self.draw_tree()
         self.message = ""
 
-    def insertTreeAnimation(self, *args):
+    def insert_tree_animation(self, *args):
         """
         Runs the animation for inserting nodes into the tree, updated after each insertion
         """
@@ -421,17 +501,17 @@ class Visualization:
                 self.message_label.config(text=self.message)
 
             # Insert the new value into the binary tree
-            self.root = self.BinaryTree.insert(int(value), self.root)
+            self.root = self.RBT.insert(int(value), self.root)
 
             # If the value has already been inserted, set it as the value to be found
-            if (self.BinaryTree.recentItems[0] == None):
+            if (self.RBT.recentItems[0] == None):
                 self.find = int(value)
                 self.message = "{} has already been inserted".format(
                     str(value))
                 self.message_label.config(text=self.message)
 
             # Draw the updated tree and reset the find value to None
-            self.drawTree()
+            self.draw_tree()
             self.find = None
 
             # Update the canvas and wait for one second
@@ -445,7 +525,7 @@ class Visualization:
         self.message = ""
         self.message_label.config(text=self.message)
 
-    def insertTree(self, *args):
+    def insert_tree(self, *args):
         """
         Insert a value into the binary tree and update the display of the tree
         """
@@ -475,21 +555,21 @@ class Visualization:
             self.message_label.config(text=self.message)
 
         # Insert value into binary tree
-        self.root = self.BinaryTree.insert(value, self.root)
+        self.root = self.RBT.insert(value, self.root)
 
         # Store the value that was recently added
-        if (self.BinaryTree.recentItems[0] == None):
+        if (self.RBT.recentItems[0] == None):
             self.find = value
 
         # Update display of the binary tree
-        self.drawTree()
+        self.draw_tree()
 
         # Reset find value
         self.find = None
 
-    def deleteNode(self, *args):
+    def delete_node(self, *args):
         """
-        Deletes node from tree
+        deletes node from tree
         """
         # Get value from entry widget
         try:
@@ -506,8 +586,8 @@ class Visualization:
         self.message = "Deleting {}... ".format(str(value))
         self.message_label.config(text=self.message)
 
-        # Delete the node from the tree
-        self.root = self.BinaryTree.Delete(value, self.root)
+        # delete the node from the tree
+        self.root = self.RBT.delete(value, self.root)
 
         # Check if tree is empty
         if (self.root == None):
@@ -517,9 +597,9 @@ class Visualization:
             self.searchButton['state'] = 'disabled'
 
         # Redraw the tree
-        self.drawTree()
+        self.draw_tree()
 
-    def searchTree(self, *args):
+    def search_tree(self, *args):
         """
         Searches the tree for a value and reports if it is found
         """
@@ -536,8 +616,8 @@ class Visualization:
         self.message = "Searching for {}...".format(str(value))
         self.message_label.config(text=self.message)
 
-        # Call the `searchForValue` method of the `BinaryTree` class to find the node
-        Node = self.BinaryTree.searchForValue(value, self.root)
+        # Call the `search_for_value` method of the `RBT` class to find the node
+        Node = self.RBT.search_for_value(value, self.root)
 
         # Check if the node was found or not
         if (Node == None):
@@ -547,10 +627,10 @@ class Visualization:
             self.message = "{} was found".format(str(value))
             self.message_label.config(text=self.message)
             self.find = value
-            self.drawTree()
+            self.draw_tree()
             self.find = None
 
-    def drawTree(self):
+    def draw_tree(self):
         """
         Draws the red-black tree on the canvas widget.
         """
@@ -566,7 +646,7 @@ class Visualization:
             self.ymax = self.canvas.winfo_height()
 
             # Get the number of lines required to display the binary tree
-            self.numberLines = self.BinaryTree.getHeight(self.root)
+            self.numberLines = self.RBT.get_height(self.root)
 
             # Calculate the x-coordinate of the root node
             Xcoordinate = int(self.xmax / 2)
@@ -575,9 +655,9 @@ class Visualization:
             Ycoordinate = int(self.ymax / (self.numberLines + 2))
 
             # Draw the binary tree starting from the root node
-            self.drawNode(self.root, Xcoordinate, Ycoordinate, 1)
+            self.draw_node(self.root, Xcoordinate, Ycoordinate, 1)
 
-    def drawNode(self, Node, posX, posY, line):
+    def draw_node(self, Node, posX, posY, line):
         """
         Draws a node of the red-black tree.
         """
@@ -594,36 +674,38 @@ class Visualization:
         childPositionY = posY + y
 
         # Draw the right child node, if it exists
-        if (Node.right != None):
+        if (Node.right_child != None):
             childPositionX = posX + (x + 4)
             # Draw a line connecting the current node to its right child
             self.canvas.create_line(posX, posY, childPositionX,
                                     childPositionY, fill="white")
             # Draw the right child node
-            self.drawNode(Node.right, childPositionX, childPositionY, line + 1)
+            self.draw_node(Node.right_child, childPositionX,
+                           childPositionY, line + 1)
         else:
             # If NIL nodes should be drawn, draw a line to the right NIL node
             if (self.drawNIL == TRUE):
                 childPositionX = posX + (x + 4)
                 self.canvas.create_line(
                     posX, posY, childPositionX, childPositionY, fill="white")
-                self.drawRightNIL(posX, posY, line)
+                self.draw_right_nil(posX, posY, line)
 
         # Draw the left child node, if it exists
-        if (Node.left != None):
+        if (Node.left_child != None):
             childPositionX = posX - (x + 4)
             # Draw a line connecting the current node to its left child
             self.canvas.create_line(posX, posY, childPositionX,
                                     childPositionY, fill="white")
             # Draw the left child node
-            self.drawNode(Node.left, childPositionX, childPositionY, line + 1)
+            self.draw_node(Node.left_child, childPositionX,
+                           childPositionY, line + 1)
         else:
             # If NIL nodes should be drawn, draw a line to the left NIL node
             if (self.drawNIL == TRUE):
                 childPositionX = posX - (x + 4)
                 self.canvas.create_line(
                     posX, posY, childPositionX, childPositionY, fill="white")
-                self.drawLeftNIL(posX, posY, line)
+                self.draw_left_nil(posX, posY, line)
 
         # Calculate the coordinates of the current node's oval
         Xcoordinate = int(posX - self.size / 2)
@@ -632,12 +714,12 @@ class Visualization:
         Ycoordinate2 = int(posY + self.size / 2)
 
         # Highlight recently updated node
-        if (Node.value in self.BinaryTree.recentItems[1: -1]):
+        if (Node.value in self.RBT.recentItems[1: -1]):
             self.canvas.create_oval(Xcoordinate - highlight, Ycoordinate - highlight,
                                     Xcoordinate2 + highlight, Ycoordinate2 + highlight, fill='paleturquoise')
 
         # Highlight the most recently inserted node
-        if (Node.value == self.BinaryTree.recentItems[0]):
+        if (Node.value == self.RBT.recentItems[0]):
             self.canvas.create_oval(Xcoordinate - highlight, Ycoordinate - highlight,
                                     Xcoordinate2 + highlight, Ycoordinate2 + highlight, fill='lightgreen')
 
@@ -649,12 +731,12 @@ class Visualization:
             self.message_label.config(text=self.message)
 
         # Color the node differently depending on its status of red of black
-        NodeColor = ("black" if self.BinaryTree.isNodeBlack(Node) else "red")
+        NodeColor = ("black" if self.RBT.is_node_nlack(Node) else "red")
         self.canvas.create_oval(Xcoordinate, Ycoordinate,
                                 Xcoordinate2, Ycoordinate2, fill=NodeColor)
         self.canvas.create_text(posX, posY, text=str(Node.value), fill="white")
 
-    def drawRightNIL(self, posX, posY, line):
+    def draw_right_nil(self, posX, posY, line):
         # Calculate y-coordinate for child node
         y = self.ymax / (self.numberLines + 1)
 
@@ -682,7 +764,7 @@ class Visualization:
         self.canvas.create_text(
             childPositionX + 1, childPositionY, text="NIL", fill="white", font=('Times', 6))
 
-    def drawLeftNIL(self, posX, posY, line):
+    def draw_left_nil(self, posX, posY, line):
         # Calculate y-coordinate for child node
         y = self.ymax / (self.numberLines + 1)
 
