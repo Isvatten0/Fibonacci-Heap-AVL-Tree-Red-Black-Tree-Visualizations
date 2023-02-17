@@ -1,3 +1,5 @@
+# Created By Team 6, The Balanced Fibs: Bryson Duckworth, Alyssa Gabrielson, Will Miller, Riley Parker, Sydney Pierce, Luke Roberts, & Joey Walker
+
 import time
 import threading
 from tkinter.ttk import Label
