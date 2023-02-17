@@ -34,6 +34,7 @@ Running the Visualization
 To run the visualization, simply run the avl_tree_visualization.py file using a Python interpreter. You should see a window pop up displaying the AVL Tree.
 
 ## Interacting with the Visualization
+To run the visualization, simply run the avl_animation.py file using a Python interpreter.
 The visualization provides several buttons that allow you to interact with the tree:
 
 Insert: Allows you to insert a new node into the tree.
