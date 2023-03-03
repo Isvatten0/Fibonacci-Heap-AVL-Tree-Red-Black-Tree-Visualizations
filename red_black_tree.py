@@ -72,10 +72,10 @@ class RBT() :
         if node.parent.parent == None:                                             #if no grandparent, tree automatically correct
             return                                                                 
         
-        self.insertionBalance(node)                                                #else, balance tree
+        self.insertion_balance(node)                                                #else, balance tree
         
     # rotate right, called from insertionBalance
-    def rotateRight(self, rotate_node):
+    def rotate_right(self, rotate_node):
         new_top = rotate_node.left_child                                           #left child will be new top
         rotate_node.left_child = new_top.right_child                               #give its right child to rotate node
         if new_top.right_child != self.NULL:
@@ -93,7 +93,7 @@ class RBT() :
         rotate_node.parent = new_top                                               #new top is parent of rotate node
         
     # rotate left, called from insertionBalance
-    def rotateLeft(self, rotate_node):
+    def rotate_left(self, rotate_node):
         new_top = rotate_node.right_child                                          #right_child child will be new top
         rotate_node.right_child = new_top.left_child                               #give its left_child child to rotate node
         if new_top.left_child != self.NULL:
@@ -111,7 +111,7 @@ class RBT() :
         rotate_node.parent = new_top                                               #new top is parent of rotate node
         
     # fix tree after an insertion, called from insert
-    def insertionBalance(self, node):        
+    def insertion_balance(self, node):        
         while node.parent.color == "red":                                          #if parent is black, already balanced
             parent = node.parent
             grandparent = node.parent.parent
@@ -126,10 +126,10 @@ class RBT() :
                 else:                                                              #if uncle is black
                     if node == parent.left_child:                                  #if node is left child, rotate right at parent
                         node = parent
-                        self.rotateRight(node)
+                        self.rotate_right(node)
                     node.parent.color = "black"                                    #color parent black, grandparent red, rotate left at grandparent
                     node.parent.parent.color = "red"
-                    self.rotateLeft(node.parent.parent)
+                    self.rotate_left(node.parent.parent)
             else:                                                                  #if parent is left child
                 uncle = grandparent.right_child
                 if uncle.color == "red":                                           #if uncle is also red, color both black & grandparent red
@@ -140,23 +140,23 @@ class RBT() :
                 else:                                                              #if unlce is black
                     if node == parent.right_child:                                 #if node is right child, rotate left at parent
                         node = parent
-                        self.rotateLeft(node)
+                        self.rotate_left(node)
                         node.parent.color = "black"                                #color parent black, grandparent red, rotate right at grandparent
                         node.parent.parent.color = "red"
-                        self.rotateRight(node.parent.parent)
+                        self.rotate_right(node.parent.parent)
             if node == self.root:                                                  #if you get all the way up to root -> done
                 break
         self.root.color = "black"                                                  #color root black
     
     # fix tree after a deletion, called from delete help
-    def deletionBalance(self, node):
+    def deletion_balance(self, node):
         while node != self.root and node.color == "black":                         #while not the root & is black
             if node == node.parent.left_child:                                     #if node is left child
                 sib = node.parent.right_child
                 if sib.color == "red":                                             #if sibling is red, set black, set parent red & rotate left
                     sib.color = "black"
                     node.parent.color = "red"
-                    self.rotateLeft(node.parent)
+                    self.rotate_left(node.parent)
                     sib = node.parent.right_child
                     
                 if sib.left_child.color == "black" and sib.right_child.color == "black":    #if sibling's children black, set sib red & parent as node
@@ -166,20 +166,20 @@ class RBT() :
                     if sib.right_child.color == "black":
                         sib.left_child.color = "black"
                         sib.color = "red"
-                        self.rotateRight(sib)
+                        self.rotate_right(sib)
                         sib = node.parent.right_child
                         
                     sib.color = node.parent.color                                  #fix colors and rotate left on parent
                     node.parent.color = "black"
                     sib.right_child.color = "black"
-                    self.rotateLeft(node.parent)
+                    self.rotate_left(node.parent)
                     node = self.root
             else:                                                                  #if node is right child
                 sib = node.parent.left
                 if sib.color == "red":                                             #if sibling is red, set black, set parent red & rotate right
                     sib.color = "black"
                     node.parent.color = "red"
-                    self.rotateRight(node.parent)
+                    self.rotate_right(node.parent)
                     sib = node.parent.left_child
                 
                 if sib.left_child.color == "black" and sib.right_child.color == "black":    #id sibling's children black, set sib red &  parent as node
@@ -189,13 +189,13 @@ class RBT() :
                     if sib.left_child.color == "black":
                         sib.right_child.color = "black"
                         sib.color = "red"
-                        self.rotateLeft(sib)
+                        self.rotate_left(sib)
                         sib = node.parent.left_child
                     
                     sib.color = node.parent.color                                  #fix colors and rotate right on parent
                     node.parent.color = "black"
                     sib.left_child.color = "black"
-                    self.rotateRight(node.parent)
+                    self.rotate_right(node.parent)
                     node = self.root
         node.color = "black"
         
@@ -252,7 +252,7 @@ class RBT() :
             b.color = match.color
             
         if b_color == "black":
-            self.deletionBalance(a)
+            self.deletion_balance(a)
     
     # find minimum node
     def minimum(self, node):
