@@ -16,7 +16,7 @@ class Node:
         self.right_child = right
 
 
-class BinaryTree:
+class RBT:
     # Initialize recent items with root node or None
     def __init__(self, root=None):
         self.root = root
@@ -487,7 +487,7 @@ class Visualization:
 
         # initialize the size of the nodes
         self.size = 30
-        self.BinaryTree = BinaryTree()
+        self.RBT = RBT()
         self.root = None
         self.Trees = [None]
         self.Index = 0
@@ -524,10 +524,10 @@ class Visualization:
                 self.message_label.config(text=self.message)
 
             # Insert the new value into the binary tree
-            self.root = self.BinaryTree.insert(int(value), self.root)
+            self.root = self.RBT.insert(int(value), self.root)
 
             # If the value has already been inserted, set it as the value to be found
-            if (self.BinaryTree.recentItems[0] == None):
+            if (self.RBT.recentItems[0] == None):
                 self.find = int(value)
                 self.message = "{} has already been inserted".format(
                     str(value))
@@ -578,10 +578,10 @@ class Visualization:
             self.message_label.config(text=self.message)
 
         # Insert value into binary tree
-        self.root = self.BinaryTree.insert(value, self.root)
+        self.root = self.RBT.insert(value, self.root)
 
         # Store the value that was recently added
-        if (self.BinaryTree.recentItems[0] == None):
+        if (self.RBT.recentItems[0] == None):
             self.find = value
 
         # Update display of the binary tree
@@ -610,7 +610,7 @@ class Visualization:
         self.message_label.config(text=self.message)
 
         # Delete the node from the tree
-        self.root = self.BinaryTree.delete(value, self.root)
+        self.root = self.RBT.delete(value, self.root)
 
         # Check if tree is empty
         if (self.root == None):
@@ -639,8 +639,8 @@ class Visualization:
         self.message = "Searching for {}...".format(str(value))
         self.message_label.config(text=self.message)
 
-        # Call the `search_for_value` method of the `BinaryTree` class to find the node
-        Node = self.BinaryTree.search_for_value(value, self.root)
+        # Call the `search_for_value` method of the `RBT` class to find the node
+        Node = self.RBT.search_for_value(value, self.root)
 
         # Check if the node was found or not
         if (Node == None):
@@ -669,7 +669,7 @@ class Visualization:
             self.ymax = self.canvas.winfo_height()
 
             # Get the number of lines required to display the binary tree
-            self.numberLines = self.BinaryTree.get_height(self.root)
+            self.numberLines = self.RBT.get_height(self.root)
 
             # Calculate the x-coordinate of the root node
             Xcoordinate = int(self.xmax / 2)
@@ -735,12 +735,12 @@ class Visualization:
         Ycoordinate2 = int(posY + self.size / 2)
 
         # Highlight recently updated node
-        if (Node.value in self.BinaryTree.recentItems[1: -1]):
+        if (Node.value in self.RBT.recentItems[1: -1]):
             self.canvas.create_oval(Xcoordinate - highlight, Ycoordinate - highlight,
                                     Xcoordinate2 + highlight, Ycoordinate2 + highlight, fill='paleturquoise')
 
         # Highlight the most recently inserted node
-        if (Node.value == self.BinaryTree.recentItems[0]):
+        if (Node.value == self.RBT.recentItems[0]):
             self.canvas.create_oval(Xcoordinate - highlight, Ycoordinate - highlight,
                                     Xcoordinate2 + highlight, Ycoordinate2 + highlight, fill='lightgreen')
 
@@ -752,7 +752,7 @@ class Visualization:
             self.message_label.config(text=self.message)
 
         # Color the node differently depending on its status of red of black
-        NodeColor = ("black" if self.BinaryTree.is_node_black(Node) else "red")
+        NodeColor = ("black" if self.RBT.is_node_black(Node) else "red")
         self.canvas.create_oval(Xcoordinate, Ycoordinate,
                                 Xcoordinate2, Ycoordinate2, fill=NodeColor)
         self.canvas.create_text(posX, posY, text=str(Node.value), fill="white")
