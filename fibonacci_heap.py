@@ -14,8 +14,8 @@ class Node:
         self.right = None   # pointer to right sibling
         self.degree = 0     # number of children
         self.mark = False   # mark if child has been removed since insertion
-        self.highlight = False  #Highlight for animation
-    
+        self.highlight = False  # Highlight for animation
+
 
 class FibonacciHeap:
     def __init__(self, root: tk.Tk):
@@ -27,34 +27,38 @@ class FibonacciHeap:
         self.window = root
         self.treeCanvasWidth = 1920
         self.treeCanvasHeight = 880
-        self.nodeSize = 30      #Diameter of a node
+        self.nodeSize = 30  # Diameter of a node
         self.visited = {}
-        #Node object settings
+        # Node object settings
         self.font = 'Helvetica 15 bold'
         self.baseColor = "tan"
         self.markedColor = "orange"
         self.highlightColor = "yellow"
         self.visitedColor = "red"
         self.foundColor = "green"
-        #Animation Settings
+        # Animation Settings
         self.sleepTime = 1
-        #Build Main Containers
-        self.treeCanvas = tk.Canvas(self.window,width=self.treeCanvasWidth,height=self.treeCanvasHeight,bg="white",relief=tk.RAISED,bd=8)
+        # Build Main Containers
+        self.treeCanvas = tk.Canvas(self.window, width=self.treeCanvasWidth,
+                                    height=self.treeCanvasHeight, bg="white", relief=tk.RAISED, bd=8)
         self.frame = tk.Frame(self.window)
         self.entry = tk.Entry(self.frame, bd=5)
         self.entryLabel = tk.Label(self.frame, text="Enter node key: ")
-        self.insertButton = tk.Button(self.frame, text="Insert", command= lambda: self.insert())
-        self.deleteButton = tk.Button(self.frame, text="Delete", command = lambda: self.delete())
-        self.findButton = tk.Button(self.frame, text="Find", command = lambda: self.find())
-        #Place Main Containers
-        self.treeCanvas.place(x=0,y=200)
+        self.insertButton = tk.Button(
+            self.frame, text="Insert", command=lambda: self.insert())
+        self.deleteButton = tk.Button(
+            self.frame, text="Delete", command=lambda: self.delete())
+        self.findButton = tk.Button(
+            self.frame, text="Find", command=lambda: self.find())
+        # Place Main Containers
+        self.treeCanvas.place(x=0, y=200)
         self.frame.pack()
         self.entryLabel.pack()
         self.entry.pack()
         self.insertButton.pack()
         self.deleteButton.pack()
         self.findButton.pack()
-    
+
     def _insert_root(self, node):
         self.min.left.right = node
         node.left = self.min.left
@@ -62,14 +66,14 @@ class FibonacciHeap:
         node.right = self.min
         node.parent = None
         self.num_trees += 1
-    
+
     def _remove_root(self, node):
-        if(self.min == node):
+        if (self.min == node):
             if self.min.right != self.min:
                 itr = self.min.right
                 new_min = self.min.right
-                while(itr != self.min):
-                    if(itr.key < new_min.key):
+                while (itr != self.min):
+                    if (itr.key < new_min.key):
                         new_min = itr
                     itr = itr.right
                 self.min = new_min
@@ -80,7 +84,7 @@ class FibonacciHeap:
         node.left.right = node.right
         node.right.left = node.left
         self.num_trees -= 1
-    
+
     def _add_child(self, parent, child):
         # Add child to parents child list
         if parent.child != None:
@@ -92,11 +96,11 @@ class FibonacciHeap:
             parent.child = child
             child.right = child
             child.left = child
-        # Make the child's parent 
+        # Make the child's parent
         child.parent = parent
         # Incrment the parents degree
         parent.degree += 1
-    
+
     # Makes y the child of x.
     def _link(self, node_x, node_y):
         self._remove_root(node_x)
@@ -104,17 +108,17 @@ class FibonacciHeap:
             self.marks = False
         self._add_child(node_y, node_x)
 
-    #First attempt at consolidate. 
-    #1. Checks the roots in the list to see if two roots have the same degree.
-    #2. Merges the two trees into one root by using the  as the root with the smaller key. The larger key root
-    #becomes the child.
-    #3 This process is repeated until all roots in the list have different degrees.
+    # First attempt at consolidate.
+    # 1. Checks the roots in the list to see if two roots have the same degree.
+    # 2. Merges the two trees into one root by using the  as the root with the smaller key. The larger key root
+    # becomes the child.
+    # 3 This process is repeated until all roots in the list have different degrees.
     def _consolidate(self):
-        
+
         # for each node in root list
-            # check degrees
-            # merge if degrees are same
-        
+        # check degrees
+        # merge if degrees are same
+
         A = [None] * self.num_nodes
         root = self.min
         counter = self.num_trees
@@ -127,8 +131,8 @@ class FibonacciHeap:
             while A[d]:
                 y = A[d]
                 if x.key > y.key:
-                    x,y = y,x
-                self._link(y,x)
+                    x, y = y, x
+                self._link(y, x)
                 self.treeCanvas.delete('all')
                 self.display()
                 time.sleep(self.sleepTime)
@@ -163,7 +167,7 @@ class FibonacciHeap:
         self.display()
         time.sleep(self.sleepTime)
         self.window.update()
-    
+
     # Cut all parent/grandparent nodes that are marked.
     def _cascade_cut(self, node: Node):
         if node.parent != None:
@@ -180,11 +184,11 @@ class FibonacciHeap:
                 self.window.update()
                 node.highlight = False
                 self._cascade_cut(parent)
-    
+
     # Returns the node with the specified key.
     def find(self, key=None, current_node=None, current_tree=None, current_root=None):
         if key == None:
-            key=int(self.entry.get())
+            key = int(self.entry.get())
         # If find was called, set current tree and node.
         if current_node == None:
             current_tree = self.min
@@ -210,7 +214,8 @@ class FibonacciHeap:
             self.display()
             time.sleep(self.sleepTime)
             self.window.update()
-            found = self.find(key, current_node.child, current_tree, current_node.child)
+            found = self.find(key, current_node.child,
+                              current_tree, current_node.child)
             if found != None:
                 return found
         if current_node.right != current_root:
@@ -218,7 +223,8 @@ class FibonacciHeap:
             self.display()
             time.sleep(self.sleepTime)
             self.window.update()
-            found = self.find(key, current_node.right, current_tree, current_root)
+            found = self.find(key, current_node.right,
+                              current_tree, current_root)
             if found != None:
                 return found
         else:
@@ -226,12 +232,12 @@ class FibonacciHeap:
             self.display()
             self.window.update()
             return None
-    
+
     # Insert a new node into the FibonacciHeap.
-    def insert(self, key = None):
+    def insert(self, key=None):
         if key == None:
             if self.entry.get() == '':
-                for i in range(1,21):
+                for i in range(1, 21):
                     self.insert(i)
                 return
             else:
@@ -255,16 +261,16 @@ class FibonacciHeap:
         self.treeCanvas.delete('all')
         self.display()
         new_node.highlight = False
-    
+
     # Remove the node from the FibonacciHeap.
     def delete(self):
-        key=int(self.entry.get())
+        key = int(self.entry.get())
         # Make the node the new min and extract it.
         node = self.find(key)
         if node != self.min:
             self.decrease_key(node, float('-inf'))
         self.extract_min()
-    
+
     # Return the node with the minimum key.
     def find_min(self):
         self.min.highlight = True
@@ -274,7 +280,7 @@ class FibonacciHeap:
         self.window.update()
         self.min.highlight = False
         return self.min
-    
+
     # Remove and return minimum node from the fibonacci heap
     def extract_min(self):
         # Don't return anything if no nodes
@@ -288,7 +294,7 @@ class FibonacciHeap:
             if self.min.child != None:
                 itr = self.min.child
                 last = itr.left
-                while(itr.parent != None):
+                while (itr.parent != None):
                     next = itr.right
                     itr.mark = False
                     self._insert_root(itr)
@@ -310,7 +316,7 @@ class FibonacciHeap:
             self.window.update()
             # Return the extracted minimum key node
             return extracted_node
-    
+
     # Concatenate one Fibonacci Heap to another.
     def union(self, other):
         # Skip union if one of the FH is empty.
@@ -329,7 +335,7 @@ class FibonacciHeap:
         # Add other num_trees and num_nodes
         self.num_trees += other.num_trees
         self.num_nodes += other.num_nodes
-    
+
     # Decrease the key value of the given node.
     def decrease_key(self, node: Node, newKey: int):
         # Display before.
@@ -359,28 +365,36 @@ class FibonacciHeap:
         time.sleep(self.sleepTime)
         self.window.update()
         node.highlight = False
-    
+
     def display(self, current_node=None, x=181, y=100):
         if current_node == None:
             current_node = self.min
-            self.treeCanvas.create_text(x+self.nodeSize/2, y+self.nodeSize/2, text="Minimum Node")
-            self.treeCanvas.create_line(x+self.nodeSize/2, y+self.nodeSize, x+self.nodeSize/2, y+100, arrow=tk.LAST)
+            self.treeCanvas.create_text(
+                x+self.nodeSize/2, y+self.nodeSize/2, text="Minimum Node")
+            self.treeCanvas.create_line(
+                x+self.nodeSize/2, y+self.nodeSize, x+self.nodeSize/2, y+100, arrow=tk.LAST)
             y = y + 100
 
         # Draw node.
         if current_node.highlight == True:
-            self.treeCanvas.create_oval(x, y, x+self.nodeSize, y+self.nodeSize, fill=self.highlightColor)
+            self.treeCanvas.create_oval(
+                x, y, x+self.nodeSize, y+self.nodeSize, fill=self.highlightColor)
         elif self.visited.get(current_node.key):
-            self.treeCanvas.create_oval(x, y, x+self.nodeSize, y+self.nodeSize, fill=self.visitedColor)
+            self.treeCanvas.create_oval(
+                x, y, x+self.nodeSize, y+self.nodeSize, fill=self.visitedColor)
         elif current_node.mark == True:
-            self.treeCanvas.create_oval(x, y, x+self.nodeSize, y+self.nodeSize, fill=self.markedColor)
+            self.treeCanvas.create_oval(
+                x, y, x+self.nodeSize, y+self.nodeSize, fill=self.markedColor)
         else:
-            self.treeCanvas.create_oval(x, y, x+self.nodeSize, y+self.nodeSize, fill=self.baseColor)
-        self.treeCanvas.create_text(x+self.nodeSize/2, y+self.nodeSize/2, text=current_node.key)
-        
+            self.treeCanvas.create_oval(
+                x, y, x+self.nodeSize, y+self.nodeSize, fill=self.baseColor)
+        self.treeCanvas.create_text(
+            x+self.nodeSize/2, y+self.nodeSize/2, text=current_node.key)
+
         # Draw each linked node.
         current_child = current_node.child
-        offset = -self.nodeSize * (2**(current_node.degree-3)) * (current_node.degree-1) / 2
+        offset = -self.nodeSize * \
+            (2**(current_node.degree-3)) * (current_node.degree-1) / 2
 
         # if current_child and current_node.key == 1:
         #     print(current_node.degree)
@@ -388,7 +402,8 @@ class FibonacciHeap:
         for child in range(current_node.degree):
 
             # Draw Parent Links
-            self.treeCanvas.create_line(x+self.nodeSize/2, y+self.nodeSize, x+offset+self.nodeSize/2, y+100, arrow=tk.BOTH)
+            self.treeCanvas.create_line(
+                x+self.nodeSize/2, y+self.nodeSize, x+offset+self.nodeSize/2, y+100, arrow=tk.BOTH)
 
             # Draw Child Node
             self.display(current_child, x+offset, y+100)
@@ -397,15 +412,18 @@ class FibonacciHeap:
             if current_child != current_node.child.left:
                 # Draw right line
                 offset2 = offset + (2**child * self.nodeSize) + 60
-                self.treeCanvas.create_line(x+self.nodeSize+offset, y+115, x+offset2, y+115, arrow=tk.BOTH)
+                self.treeCanvas.create_line(
+                    x+self.nodeSize+offset, y+115, x+offset2, y+115, arrow=tk.BOTH)
                 offset = offset2
 
             # Iterate child.
             current_child = current_child.right
-        
+
         if current_node.parent == None and current_node.right != self.min:
-            tree_offset = (current_node.right.degree+current_node.degree) * 45 + 120
-            self.treeCanvas.create_line(x+self.nodeSize, y+self.nodeSize/2, x+tree_offset, y+self.nodeSize/2, arrow=tk.BOTH)
+            tree_offset = (current_node.right.degree +
+                           current_node.degree) * 45 + 120
+            self.treeCanvas.create_line(
+                x+self.nodeSize, y+self.nodeSize/2, x+tree_offset, y+self.nodeSize/2, arrow=tk.BOTH)
             self.display(current_node.right, x+tree_offset, y)
 
 
@@ -413,8 +431,8 @@ if __name__ == "__main__":
     window = tk.Tk()
     window.title("Fibonacci Heap Visualization")
     window.geometry("1920x1080")
-    window.maxsize(1920,1080)
-    window.minsize(1920,1080)
+    window.maxsize(1920, 1080)
+    window.minsize(1920, 1080)
     window.config(bg="grey")
     FibonacciHeap(window)
     window.mainloop()
